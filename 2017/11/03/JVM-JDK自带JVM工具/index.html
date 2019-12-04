@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="解决Java程序JVM相关问题时，知识与经验是基础，数据是依据，工具是运用知识与经验处理数据的手段。 JVM相关的数据举例：  运行日志 异常堆栈 GC日志 线程快照(threaddump&#x2F;javacore) 堆转储快照(heapdump&#x2F;hprof)">
+<meta name="keywords" content="Java,JVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM-JDK自带JVM工具">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2017&#x2F;11&#x2F;03&#x2F;JVM-JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;index.html">
+<meta property="og:site_name" content="ReimuWang&#39;s Blog">
+<meta property="og:description" content="解决Java程序JVM相关问题时，知识与经验是基础，数据是依据，工具是运用知识与经验处理数据的手段。 JVM相关的数据举例：  运行日志 异常堆栈 GC日志 线程快照(threaddump&#x2F;javacore) 堆转储快照(heapdump&#x2F;hprof)">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;0.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;1.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;2.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;3.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;4.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;5.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;6.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;7.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;8.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;9.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;10.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;11.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;12.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;13.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;14.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;15.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;16.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;17.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;18.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;19.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;20.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;21.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;22.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;23.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;24.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;25.jpg">
+<meta property="og:updated_time" content="2019-04-07T12:51:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7&#x2F;0.jpg">
+
+<link rel="canonical" href="http://yoursite.com/2017/11/03/JVM-JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>JVM-JDK自带JVM工具 | ReimuWang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ReimuWang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/03/JVM-JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="王艺凯">
+      <meta itemprop="description" content="Thou Shalt Comment">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ReimuWang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM-JDK自带JVM工具
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-11-03 10:00:49" itemprop="dateCreated datePublished" datetime="2017-11-03T10:00:49+08:00">2017-11-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-04-07 20:51:58" itemprop="dateModified" datetime="2019-04-07T20:51:58+08:00">2019-04-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index">
+                    <span itemprop="name">JVM</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>解决Java程序JVM相关问题时，知识与经验是基础，数据是依据，工具是运用知识与经验处理数据的手段。</p>
+<p>JVM相关的数据举例：</p>
+<ul>
+<li>运行日志</li>
+<li>异常堆栈</li>
+<li>GC日志</li>
+<li>线程快照(threaddump/javacore)</li>
+<li>堆转储快照(heapdump/hprof)</li>
+</ul>
+<a id="more"></a>
+
+<p>本文所介绍的环境为Windows平台下的JDK1.7.0_80，其bin目录中的内容如下：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/0.jpg" alt="0.jpg"></p>
+<p>这些工具大多只有十几K，之所以能做到如此小巧，是因为它们基本都是对jdk/lib/tools.jar的二次封装，可以对比看一下tools.jar解压后的内容：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/1.jpg" alt="1.jpg"></p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/2.jpg" alt="2.jpg"></p>
+<h1 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h1><p><strong>jps</strong></p>
+<p>jps(JVM Process Status Tool)类似于Linux的ps命令，用于显示系统中所有的Hotspot VM进程，并显示JVM执行的主类(Main Class，即main()所在的类)及这些JVM进程的本地虚拟机唯一ID(Local Virtual Machine Identifier,LVMID)。LVMID是整个JDK监控工具体系的线索，用于作为后续监控工作的查询条件。</p>
+<p>对于本地虚拟机进程而言，LVMID与操作系统的进程ID(Process Identifier,PID)是一致的。Windows下利用资源管理器Linux下利用ps均可得到该PID，但此时无法根据JVM执行的主类进行定位。</p>
+<p>运行一个测试用的小程序:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">     * -Xms20m -Xmx20m -Xmn10m -XX:+PrintGCDetails -XX:+UseSerialGC -XX:MaxTenuringThreshold&#x3D;15</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        while (true) ;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>将该程序运行起来后：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/3.jpg" alt="3.jpg"></p>
+<p>-q只输出LVMID。</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/4.jpg" alt="4.jpg"></p>
+<p>-m输出启动时传递给main()的参数。</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/5.jpg" alt="5.jpg"></p>
+<p>-l输出主类的全路径名。若进程执行的是Jar包则输出Jar路径。</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/6.jpg" alt="6.jpg"></p>
+<p>-v输出JVM参数</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/7.jpg" alt="7.jpg"></p>
+<p><strong>jstat</strong></p>
+<p>jstat(JVM Statistics Monitoring tool)可用于监控JVM的运行时状态信息。它可以显示本地或远程JVM进程中的类装载，内存，垃圾收集，JIT编译等运行时数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">     * -Xms20m -Xmx20m -Xmn10m -XX:+PrintGCDetails -XX:+UseSerialGC -XX:MaxTenuringThreshold&#x3D;15</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        while (true) ;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/8.jpg" alt="8.jpg"></p>
+<p>6372是LVMID，1000是输出间隔(单位ms)，5是输出次数。</p>
+<p>-gcutil：监控堆及方法区的内存使用情况，GC时间等信息。并重点关注已使用空间占总空间百分比。即各内存区域下的数值为已用空间占总空间的百分比。</p>
+<ul>
+<li>S0:Survivor0</li>
+<li>S1:Survivor1</li>
+<li>E:Eden</li>
+<li>O:old(老年代)</li>
+<li>P:Permanent(永久代)</li>
+<li>YGC:Young GC(Minor GC)次数</li>
+<li>YGCT:Young GC(Minor GC)耗时。单位为秒。</li>
+<li>FGC:Full GC次数</li>
+<li>FGCT:Full GC耗时，单位为秒。</li>
+<li>GCT:所有GC总耗时，单位为秒。</li>
+</ul>
+<p><strong>jinfo</strong></p>
+<p>jinfo(Configuration Info For Java)可查看JVM参数。jps -v可查看启动时显式指定的JVM参数，而jinfo能查询到包含默认值在内的所有参数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">     * -Xms20m -Xmx20m -Xmn10m -XX:+PrintGCDetails -XX:+UseSerialGC -XX:MaxTenuringThreshold&#x3D;15</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        while (true) ;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/9.jpg" alt="9.jpg"></p>
+<p>即老年代与年轻代的比例默认为2:1。</p>
+<p><strong>jmap</strong></p>
+<p>jmap(Memory Map for Java)用于生成堆转储快照(heapdump/dump)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">     * -Xms20m -Xmx20m -Xmn10m -XX:+PrintGCDetails -XX:+UseSerialGC -XX:MaxTenuringThreshold&#x3D;15</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        while (true) ;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/10.jpg" alt="10.jpg"></p>
+<p>该命令即在e盘下生成dump文件dumpTest。</p>
+<p><strong>jhat</strong></p>
+<p>由jmap dump出的堆转储快照无法直接阅读，需使用jhat(JVM Heap Analysis Tool)读取。jhat内置了一个微型的HTTP/HTML服务器用于分析阅读堆转储快照。</p>
+<p>分析上小节中jmap产生的dumpTest：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/11.jpg" alt="11.jpg"></p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/12.jpg" alt="12.jpg"></p>
+<p>分析内存泄漏问题时主要会用到其中的Show heap histogram，点进去：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/13.jpg" alt="13.jpg"></p>
+<p>该页面可显示进程中所有的同类实例数及总大小。</p>
+<p><strong>jstack</strong></p>
+<p>jstack(Stack Trace for Java)用于生成JVM当前时刻的线程快照(threaddump,javacore)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">        Thread thread &#x3D; new Thread() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">            @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">            public void run() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">                synchronized (Test.class) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">                    try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">                        Test.class.wait();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">                    &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">                        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">        thread.setName(&quot;testThread&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">        thread.start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">.&#x2F;jstack -l 7432 &gt; &#x2F;e&#x2F;1.txt</span></pre></td></tr></table></figure>
+
+<p>其中7432为LVMID。输出文件1.txt中的内容为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">2017-11-03 16:35:11</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.80-b11 mixed mode):</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&quot;DestroyJavaVM&quot; prio&#x3D;6 tid&#x3D;0x00000000024ce800 nid&#x3D;0x1df4 waiting on condition [0x0000000000000000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: RUNNABLE</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">   Locked ownable synchronizers:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">	- None</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&quot;testThread&quot; prio&#x3D;6 tid&#x3D;0x000000000c3bc000 nid&#x3D;0x1d34 in Object.wait() [0x000000000cf7e000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: WAITING (on object monitor)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">	at java.lang.Object.wait(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">	- waiting on &lt;0x00000007d5d9af10&gt; (a java.lang.Class for com.test.Test)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">	at java.lang.Object.wait(Object.java:503)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">	at com.test.Test$1.run(Test.java:11)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">	- locked &lt;0x00000007d5d9af10&gt; (a java.lang.Class for com.test.Test)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">   Locked ownable synchronizers:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">	- None</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">&quot;Service Thread&quot; daemon prio&#x3D;6 tid&#x3D;0x000000000acaf800 nid&#x3D;0x1e8c runnable [0x0000000000000000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: RUNNABLE</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">   Locked ownable synchronizers:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">	- None</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">&quot;C2 CompilerThread1&quot; daemon prio&#x3D;10 tid&#x3D;0x000000000acac800 nid&#x3D;0xcbc waiting on condition [0x0000000000000000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: RUNNABLE</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">   Locked ownable synchronizers:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">	- None</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">&quot;C2 CompilerThread0&quot; daemon prio&#x3D;10 tid&#x3D;0x000000000acab000 nid&#x3D;0x1fa4 waiting on condition [0x0000000000000000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: RUNNABLE</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">36</span></pre></td><td class="code"><pre><span class="line">   Locked ownable synchronizers:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">37</span></pre></td><td class="code"><pre><span class="line">	- None</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">38</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">39</span></pre></td><td class="code"><pre><span class="line">&quot;Attach Listener&quot; daemon prio&#x3D;10 tid&#x3D;0x000000000aca8000 nid&#x3D;0x1df8 waiting on condition [0x0000000000000000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">40</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: RUNNABLE</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">41</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">42</span></pre></td><td class="code"><pre><span class="line">   Locked ownable synchronizers:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">43</span></pre></td><td class="code"><pre><span class="line">	- None</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">44</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">45</span></pre></td><td class="code"><pre><span class="line">&quot;Signal Dispatcher&quot; daemon prio&#x3D;10 tid&#x3D;0x000000000aca7000 nid&#x3D;0x1b48 runnable [0x0000000000000000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">46</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: RUNNABLE</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">47</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">48</span></pre></td><td class="code"><pre><span class="line">   Locked ownable synchronizers:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">49</span></pre></td><td class="code"><pre><span class="line">	- None</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">50</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">51</span></pre></td><td class="code"><pre><span class="line">&quot;Finalizer&quot; daemon prio&#x3D;8 tid&#x3D;0x000000000ac2f000 nid&#x3D;0x1b28 in Object.wait() [0x000000000c25e000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">52</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: WAITING (on object monitor)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">53</span></pre></td><td class="code"><pre><span class="line">	at java.lang.Object.wait(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">54</span></pre></td><td class="code"><pre><span class="line">	- waiting on &lt;0x00000007d5d04858&gt; (a java.lang.ref.ReferenceQueue$Lock)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">55</span></pre></td><td class="code"><pre><span class="line">	at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:135)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">56</span></pre></td><td class="code"><pre><span class="line">	- locked &lt;0x00000007d5d04858&gt; (a java.lang.ref.ReferenceQueue$Lock)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">57</span></pre></td><td class="code"><pre><span class="line">	at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:151)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">58</span></pre></td><td class="code"><pre><span class="line">	at java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:209)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">59</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">60</span></pre></td><td class="code"><pre><span class="line">   Locked ownable synchronizers:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">61</span></pre></td><td class="code"><pre><span class="line">	- None</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">62</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">63</span></pre></td><td class="code"><pre><span class="line">&quot;Reference Handler&quot; daemon prio&#x3D;10 tid&#x3D;0x000000000ac2d800 nid&#x3D;0x884 in Object.wait() [0x000000000c00e000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">64</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: WAITING (on object monitor)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">65</span></pre></td><td class="code"><pre><span class="line">	at java.lang.Object.wait(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">66</span></pre></td><td class="code"><pre><span class="line">	- waiting on &lt;0x00000007d5d04470&gt; (a java.lang.ref.Reference$Lock)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">67</span></pre></td><td class="code"><pre><span class="line">	at java.lang.Object.wait(Object.java:503)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">68</span></pre></td><td class="code"><pre><span class="line">	at java.lang.ref.Reference$ReferenceHandler.run(Reference.java:133)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">69</span></pre></td><td class="code"><pre><span class="line">	- locked &lt;0x00000007d5d04470&gt; (a java.lang.ref.Reference$Lock)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">70</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">71</span></pre></td><td class="code"><pre><span class="line">   Locked ownable synchronizers:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">72</span></pre></td><td class="code"><pre><span class="line">	- None</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">73</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">74</span></pre></td><td class="code"><pre><span class="line">&quot;VM Thread&quot; prio&#x3D;10 tid&#x3D;0x000000000ac2a000 nid&#x3D;0x187c runnable </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">75</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">76</span></pre></td><td class="code"><pre><span class="line">&quot;GC task thread#0 (ParallelGC)&quot; prio&#x3D;6 tid&#x3D;0x000000000251d000 nid&#x3D;0x9b4 runnable </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">77</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">78</span></pre></td><td class="code"><pre><span class="line">&quot;GC task thread#1 (ParallelGC)&quot; prio&#x3D;6 tid&#x3D;0x000000000251e800 nid&#x3D;0x1ffc runnable </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">79</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">80</span></pre></td><td class="code"><pre><span class="line">&quot;GC task thread#2 (ParallelGC)&quot; prio&#x3D;6 tid&#x3D;0x0000000002520800 nid&#x3D;0x1ce4 runnable </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">81</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">82</span></pre></td><td class="code"><pre><span class="line">&quot;GC task thread#3 (ParallelGC)&quot; prio&#x3D;6 tid&#x3D;0x0000000002522000 nid&#x3D;0x1ce8 runnable </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">83</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">84</span></pre></td><td class="code"><pre><span class="line">&quot;VM Periodic Task Thread&quot; prio&#x3D;10 tid&#x3D;0x000000000c3b3000 nid&#x3D;0x1e34 waiting on condition </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">85</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">86</span></pre></td><td class="code"><pre><span class="line">JNI global references: 107</span></pre></td></tr></table></figure>
+
+<p>其中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">&quot;testThread&quot; prio&#x3D;6 tid&#x3D;0x000000000c3bc000 nid&#x3D;0x1d34 in Object.wait() [0x000000000cf7e000]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">   java.lang.Thread.State: WAITING (on object monitor)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">	at java.lang.Object.wait(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">	- waiting on &lt;0x00000007d5d9af10&gt; (a java.lang.Class for com.test.Test)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">	at java.lang.Object.wait(Object.java:503)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">	at com.test.Test$1.run(Test.java:11)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">	- locked &lt;0x00000007d5d9af10&gt; (a java.lang.Class for com.test.Test)</span></pre></td></tr></table></figure>
+
+<p>表明名为testThread的线程wait在了com.test.Test的类对象上。</p>
+<p>使用Thread.getAllStackTraces()可通过编程实现jstack的绝大多数功能。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.Map;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">        Thread thread &#x3D; new Thread() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">            @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">            public void run() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">                synchronized (Test.class) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">                    try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">                        Test.class.wait();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">                    &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">                        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        thread.setName(&quot;testThread&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">        thread.start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">        Thread.sleep(100);    &#x2F;&#x2F; 确保testThread已wait</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">        for (Map.Entry&lt;Thread, StackTraceElement[]&gt; stackTrace : Thread.getAllStackTraces().entrySet()) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">            System.out.println(&quot;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&quot; + stackTrace.getKey().getId() + &quot;-&quot; + stackTrace.getKey().getName());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">            for (StackTraceElement element : stackTrace.getValue()) System.out.println(element);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;4-Signal Dispatcher</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;3-Finalizer</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">java.lang.Object.wait(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:135)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:151)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:209)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;9-testThread</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">java.lang.Object.wait(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">java.lang.Object.wait(Object.java:503)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">com.test.Test$1.run(Test.java:13)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;1-main</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">java.lang.Thread.dumpThreads(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">java.lang.Thread.getAllStackTraces(Thread.java:1640)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">com.test.Test.main(Test.java:23)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;2-Reference Handler</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">java.lang.Object.wait(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">java.lang.Object.wait(Object.java:503)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">java.lang.ref.Reference$ReferenceHandler.run(Reference.java:133)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;5-Attach Listener</span></pre></td></tr></table></figure>
+
+<h1 id="可视化工具"><a href="#可视化工具" class="headerlink" title="可视化工具"></a>可视化工具</h1><p><strong>Jconsole</strong></p>
+<p>Jconsole(Java Monitoring and Management Console)诞生于JDK1.5。是一种基于JMX(Java Management Extensions，即Java管理扩展)的可视化监视及管理工具。工具位置：jdk/bin/jconsole.exe。</p>
+<p>示例代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">        Thread thread &#x3D; new Thread() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">            @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">            public void run() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">                synchronized (Test.class) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">                    try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">                        Test.class.wait();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">                    &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">                        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">        thread.setName(&quot;testThread&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">        thread.start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        while (true) ;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/14.jpg" alt="14.jpg"></p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/15.jpg" alt="15.jpg"></p>
+<p>再来构造一个死锁的例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">        Runnable r1 &#x3D; new Runnable() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">            @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">            public void run() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">                synchronized (&quot;八云紫&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">                    try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">                        Thread.sleep(100);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">                    &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">                        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">                    synchronized (&quot;八云蓝&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        Runnable r2 &#x3D; new Runnable() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">            @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">            public void run() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">                synchronized (&quot;八云蓝&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">                    try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">                        Thread.sleep(100);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">                    &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">                        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">                    synchronized (&quot;八云紫&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">        new Thread(r1, &quot;r1&quot;).start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">        new Thread(r2, &quot;r2&quot;).start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>点击“检测死锁”：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/16.jpg" alt="16.jpg"></p>
+<p>随后多出了一个“死锁”标签。</p>
+<p>r1：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/17.jpg" alt="17.jpg"></p>
+<p>r2：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/18.jpg" alt="18.jpg"></p>
+<p><strong>VisualVM</strong></p>
+<p>VisualVM(All-in-One Java Troubleshooting Tool)诞生于JDK1.6 Update7。现已成为Sun主力推动的多合一故障处理，性能分析(Profiling)工具，并已从JDK中分离出来成为可以独立发展的开源项目。不需要被监视的程序基于特殊Agent运行，因此它对被监视的程序的实际影响很小。</p>
+<p>程序位置为/jdk/bin/jvisualvm.exe。</p>
+<p>构建一个死锁的例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">        Runnable r1 &#x3D; new Runnable() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">            @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">            public void run() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">                synchronized (&quot;八云紫&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">                    try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">                        Thread.sleep(100);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">                    &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">                        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">                    synchronized (&quot;八云蓝&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        Runnable r2 &#x3D; new Runnable() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">            @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">            public void run() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">                synchronized (&quot;八云蓝&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">                    try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">                        Thread.sleep(100);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">                    &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">                        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">                    synchronized (&quot;八云紫&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">        new Thread(r1, &quot;r1&quot;).start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">        new Thread(r2, &quot;r2&quot;).start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line">        while (true) ;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">36</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>有两种方式生成堆转储快照：</p>
+<p>方法1：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/19.jpg" alt="19.jpg"></p>
+<p>方法2：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/20.jpg" alt="20.jpg"></p>
+<p>生成后：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/21.jpg" alt="21.jpg"></p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/22.jpg" alt="22.jpg"></p>
+<p>实例信息需要由类信息点击进入：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/23.jpg" alt="23.jpg"></p>
+<p>生成的堆转储文件会在VisualVM关闭时删除，若欲保存生成的堆转储快照：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/24.jpg" alt="24.jpg"></p>
+<p>装入已存在的快照：</p>
+<p><img src="/images/blog_pic/JVM/JDK%E8%87%AA%E5%B8%A6JVM%E5%B7%A5%E5%85%B7/25.jpg" alt="25.jpg"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/11/02/JVM-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/" rel="prev" title="JVM-内存分配策略">
+      <i class="fa fa-chevron-left"></i> JVM-内存分配策略
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/11/04/%E7%A2%8E%E7%89%87-%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%AF%AD%E8%A8%80%E5%8F%91%E5%B1%95%E5%8E%86%E5%8F%B2/" rel="next" title="碎片-计算机语言发展历史">
+      碎片-计算机语言发展历史 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#命令行工具"><span class="nav-number">1.</span> <span class="nav-text">命令行工具</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#可视化工具"><span class="nav-number">2.</span> <span class="nav-text">可视化工具</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">王艺凯</p>
+  <div class="site-description" itemprop="description">Thou Shalt Comment</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">188</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王艺凯</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="源码">
+<meta name="keywords" content="Java,源码,Collection">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java JDK7源码-java.util.Iterator&lt;E&gt;">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2017&#x2F;05&#x2F;24&#x2F;Java%20JDK7%E6%BA%90%E7%A0%81-javautilIteratorE&#x2F;index.html">
+<meta property="og:site_name" content="ReimuWang&#39;s Blog">
+<meta property="og:description" content="源码">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-10-09T10:26:44.000Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2017/05/24/Java%20JDK7%E6%BA%90%E7%A0%81-javautilIteratorE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Java JDK7源码-java.util.Iterator&lt;E&gt; | ReimuWang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ReimuWang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/24/Java%20JDK7%E6%BA%90%E7%A0%81-javautilIteratorE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="王艺凯">
+      <meta itemprop="description" content="Thou Shalt Comment">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ReimuWang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java JDK7源码-java.util.Iterator&lt;E&gt;
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-05-24 00:01:33" itemprop="dateCreated datePublished" datetime="2017-05-24T00:01:33+08:00">2017-05-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-10-09 18:26:44" itemprop="dateModified" datetime="2018-10-09T18:26:44+08:00">2018-10-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java-JDK7%E6%BA%90%E7%A0%81/" itemprop="url" rel="index">
+                    <span itemprop="name">Java JDK7源码</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><a id="more"></a>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">package java.util;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">import java.util.NoSuchElementException;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">public interface Iterator&lt;E&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">     * 若集合还有元素则返回true，反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">     * 更清晰的表述为：若iterator游标当前所指向的位置还有元素则返回true，反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">     * 若在本方法返回false时继续调用next()方法，则next()方法会抛出异常。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    boolean hasNext();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">     * 返回iterator游标当前所指向的元素，随后游标后移一位。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">     * @throws NoSuchElementException iterator游标当前所指向的位置已无元素</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    E next();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">     * 本方法可选，实现类可依自身情况决定是否真的需要实现。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">     * 移除iterator游标当前所指元素的前一个元素。即上一次调用next()方法所返回的元素。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">     * 因此，调用本方法之前必须调用一次next()方法。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">     * 调用一次next()方法后多次调用本方法是不允许的。本方法必须与next()方法一一配对。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">     * 这么设计是符合逻辑的，因为我们一般只有先用next()方法得到元素后，才能知道该元素是否需要被移除。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">     * 因此移除的是游标的前一个元素，而非当前游标正指向的这个我们不知道的元素。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">     * @throws UnsupportedOperationException 实现类未实现本方法。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">     * @throws IllegalStateException 本方法未与next()方法一一配对。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line">    void remove();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h1 id="已整理层级关系"><a href="#已整理层级关系" class="headerlink" title="已整理层级关系"></a>已整理层级关系</h1><p><strong><em>直接子接口</em></strong></p>
+<ul>
+<li>[java.util.ListIterator&lt;E&gt;](/2017/05/25/Java JDK7源码-javautilListIteratorE/)</li>
+</ul>
+<p><strong><em>直接实现本接口的内部类</em></strong></p>
+<ul>
+<li>[实例成员内部类java.util.AbstractList&lt;E&gt;.Itr](/2017/06/19/Java JDK7源码-javautilAbstractListE/)</li>
+<li>[实例成员内部类java.util.ArrayList&lt;E&gt;.Itr](/2017/07/06/Java JDK7源码-javautilArrayListE/)</li>
+<li>[实例成员内部类java.util.Vector&lt;E&gt;.Itr](/2017/09/05/Java JDK7源码-javautilVectorE/)</li>
+</ul>
+<h1 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h1><p>本接口是Java集合框架中的一员，用于迭代集合中的元素。Iterator&lt;E&gt;中的E代表该迭代器(iterator)返回的元素类型。</p>
+<p>Enumeration接口诞生于JDK1.0，而Iterator接口诞生于JDK1.2，是替代Enumeration的改进版本：即二者实现的功能相同，因此在日常开发中更推荐使用Iterator。Iterator与Enumeration的不同之处可归纳为如下两点：</p>
+<ul>
+<li>在迭代过程中，Iterator允许删除集合中的元素，而Enumeration则不能</li>
+<li>Iterator使用更为精简易读的方法名</li>
+</ul>
+<h1 id="未整理层级关系"><a href="#未整理层级关系" class="headerlink" title="未整理层级关系"></a>未整理层级关系</h1><p><strong><em>直接子接口</em></strong></p>
+<ul>
+<li><a href="">javax.xml.stream.XMLEventReader</a></li>
+<li><a href="">com.sun.corba.se.pept.transport.ContactInfoListIterator</a></li>
+</ul>
+<p><strong><em>直接实现本接口的类</em></strong></p>
+<ul>
+<li><a href="">java.util.Scanner</a></li>
+<li><a href="">com.sun.org.apache.xerces.internal.util.XMLAttributesIteratorImpl</a></li>
+</ul>
+<p><strong><em>直接实现本接口的非public类</em></strong></p>
+<ul>
+<li><a href="">javax.imageio.spi.FilterIterator&lt;T&gt;</a></li>
+<li><a href="">javax.imageio.spi.PartialOrderIterator</a></li>
+<li><a href="">com.sun.imageio.plugins.jpeg.ImageTypeIterator</a></li>
+</ul>
+<p><strong><em>直接实现本接口的内部类</em></strong></p>
+<ul>
+<li><a href="">实例成员内部类java.util.LinkedList&lt;E&gt;.DescendingIterator</a></li>
+<li><a href="">实例成员内部类java.util.PriorityQueue&lt;E&gt;.Itr</a></li>
+<li><a href="">实例成员内部类java.util.ArrayDeque&lt;E&gt;.DeqIterator</a></li>
+<li><a href="">实例成员内部类java.util.ArrayDeque&lt;E&gt;.DescendingIterator</a></li>
+<li><a href="">实例成员内部类java.util.HashMap&lt;K, V&gt;.HashIterator&lt;E&gt;</a></li>
+<li><a href="">实例成员内部类java.util.TreeMap&lt;K, V&gt;.PrivateEntryIterator&lt;T&gt;</a></li>
+<li><a href="">实例成员内部类java.util.WeakHashMap&lt;K, V&gt;.HashIterator&lt;T&gt;</a></li>
+<li><a href="">实例成员内部类java.util.IdentityHashMap&lt;K, V&gt;.IdentityHashMapIterator&lt;T&gt;</a></li>
+<li><a href="">实例成员内部类java.util.LinkedHashMap&lt;K, V&gt;.LinkedHashIterator&lt;T&gt;</a></li>
+<li><a href="">实例成员内部类java.util.Hashtable&lt;K, V&gt;.Enumerator&lt;T&gt;</a></li>
+<li><a href="">实例成员内部类java.util.EnumMap&lt;K extends Enum&lt;K&gt;, V&gt;.EnumMapIterator&lt;T&gt;</a></li>
+<li><a href="">实例成员内部类java.util.JumboEnumSet&lt;E extends Enum&lt;E&gt;&gt;.EnumSetIterator&lt;E extends Enum&lt;E&gt;&gt;</a></li>
+<li><a href="">实例成员内部类java.util.RegularEnumSet&lt;E extends Enum&lt;E&gt;&gt;.EnumSetIterator&lt;E extends Enum&lt;E&gt;&gt;</a></li>
+<li><a href="">实例成员内部类java.util.ServiceLoader&lt;S&gt;.LazyIterator</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.ArrayBlockingQueue&lt;E&gt;.Itr</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.ConcurrentLinkedQueue&lt;E&gt;.Itr</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.LinkedBlockingQueue&lt;E&gt;.Itr</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.LinkedTransferQueue&lt;E&gt;.Itr</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.PriorityBlockingQueue&lt;E&gt;.Itr</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.DelayQueue&lt;E extends Delayed&gt;.Itr</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.ConcurrentLinkedDeque&lt;E&gt;.AbstractItr</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.LinkedBlockingDeque&lt;E&gt;.AbstractItr</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.ConcurrentHashMap&lt;K, V&gt;.EntryIterator</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.ConcurrentHashMap&lt;K, V&gt;.KeyIterator</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.ConcurrentHashMap&lt;K, V&gt;.ValueIterator</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.ConcurrentSkipListMap&lt;K, V&gt;.Iter&lt;T&gt;</a></li>
+<li><a href="">实例成员内部类javax.xml.soap.MimeHeaders.MatchingIterator</a></li>
+<li><a href="">实例成员内部类javax.print.attribute.standard.PrinterStateReasons.PrinterStateReasonSetIterator</a></li>
+<li><a href="">实例成员内部类com.sun.corba.se.impl.encoding.BufferManagerWriteCollect.BufferManagerWriteCollectIterator</a></li>
+<li><a href="">实例成员内部类com.sun.org.apache.xerces.internal.util.NamespaceSupport.IteratorPrefixes</a></li>
+<li><a href="">非public类-实例成员内部类javax.print.MimeType.ParameterMapEntrySetIterator</a></li>
+<li><a href="">静态成员内部类java.util.Collections.EmptyIterator&lt;E&gt;</a></li>
+<li><a href="">静态成员内部类java.beans.beancontext.BeanContextSupport.BCSIterator</a></li>
+<li><a href="">静态成员内部类javax.imageio.ImageIO.ImageReaderIterator</a></li>
+<li><a href="">静态成员内部类javax.imageio.ImageIO.ImageTranscoderIterator</a></li>
+<li><a href="">静态成员内部类javax.imageio.ImageIO.ImageWriterIterator</a></li>
+<li><a href="">静态成员内部类javax.xml.validation.SchemaFactoryFinder.SingleIterator</a></li>
+<li><a href="">静态成员内部类javax.xml.xpath.XPathFactoryFinder.SingleIterator</a></li>
+<li><a href="">静态成员内部类com.sun.org.apache.xml.internal.security.keys.storage.implementations.CertsInFilesystemDirectoryResolver.FilesystemIterator</a></li>
+<li><a href="">静态成员内部类com.sun.org.apache.xml.internal.security.keys.storage.implementations.SingleCertificateResolver.InternalIterator</a></li>
+<li><a href="">静态成员内部类com.sun.org.apache.xml.internal.security.keys.storage.implementations.KeyStoreResolver.KeyStoreIterator</a></li>
+<li><a href="">静态成员内部类com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolver.ResolverIterator</a></li>
+<li><a href="">静态成员内部类com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver.StorageResolverIterator</a></li>
+<li><a href="">静态成员内部类-实例成员内部类java.util.TreeMap&lt;K, V&gt;.NavigableSubMap&lt;K, V&gt;.SubMapIterator&lt;T&gt;</a></li>
+<li><a href="">静态成员内部类-实例成员内部类java.util.concurrent.ScheduledThreadPoolExecutor.DelayedWorkQueue.Itr</a></li>
+<li><a href="">静态成员内部类-实例成员内部类java.util.concurrent.ConcurrentSkipListMap&lt;K, V&gt;.SubMap&lt;K, V&gt;.SubMapIter&lt;T&gt;</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E6%BA%90%E7%A0%81/" rel="tag"># 源码</a>
+              <a href="/tags/Collection/" rel="tag"># Collection</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/05/23/Java%20JDK7%E6%BA%90%E7%A0%81-javalangIterableT/" rel="prev" title="Java JDK7源码-java.lang.Iterable&lt;T&gt;">
+      <i class="fa fa-chevron-left"></i> Java JDK7源码-java.lang.Iterable&lt;T&gt;
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/05/25/Java%20JDK7%E6%BA%90%E7%A0%81-javautilListIteratorE/" rel="next" title="Java JDK7源码-java.util.ListIterator&lt;E&gt;">
+      Java JDK7源码-java.util.ListIterator&lt;E&gt; <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#已整理层级关系"><span class="nav-number">2.</span> <span class="nav-text">已整理层级关系</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#综述"><span class="nav-number">3.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#未整理层级关系"><span class="nav-number">4.</span> <span class="nav-text">未整理层级关系</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">王艺凯</p>
+  <div class="site-description" itemprop="description">Thou Shalt Comment</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">188</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王艺凯</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

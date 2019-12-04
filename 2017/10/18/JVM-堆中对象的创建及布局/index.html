@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="注意：  本文描述的是HotSpot实现下的情况 对象指的是普通的实例对象，不包括类对象及数组对象">
+<meta name="keywords" content="Java,JVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM-堆中对象的创建及布局">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2017&#x2F;10&#x2F;18&#x2F;JVM-%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80&#x2F;index.html">
+<meta property="og:site_name" content="ReimuWang&#39;s Blog">
+<meta property="og:description" content="注意：  本文描述的是HotSpot实现下的情况 对象指的是普通的实例对象，不包括类对象及数组对象">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80&#x2F;0.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80&#x2F;1.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80&#x2F;2.jpg">
+<meta property="og:updated_time" content="2018-11-12T12:03:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80&#x2F;0.png">
+
+<link rel="canonical" href="http://yoursite.com/2017/10/18/JVM-%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>JVM-堆中对象的创建及布局 | ReimuWang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ReimuWang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/18/JVM-%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="王艺凯">
+      <meta itemprop="description" content="Thou Shalt Comment">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ReimuWang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM-堆中对象的创建及布局
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-10-18 16:45:49" itemprop="dateCreated datePublished" datetime="2017-10-18T16:45:49+08:00">2017-10-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-11-12 20:03:42" itemprop="dateModified" datetime="2018-11-12T20:03:42+08:00">2018-11-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index">
+                    <span itemprop="name">JVM</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>注意：</strong></p>
+<ul>
+<li>本文描述的是HotSpot实现下的情况</li>
+<li>对象指的是普通的实例对象，不包括类对象及数组对象</li>
+</ul>
+<a id="more"></a>
+
+<h1 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h1><p>可以模拟一个实际场景：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Ob o &#x3D; new Ob();</span></pre></td></tr></table></figure>
+
+<p>这行代码在JVM中实际的执行步骤如下：</p>
+<p><strong>1.确保用于生成实例的模版已准备好</strong></p>
+<p>检查Ob是否能在方法区的运行时常量池中定位到一个类的符号引用，并检查这个符号引用所代表的类是否已完成了加载，连接(验证，准备，解析)，初始化。若没有，则完成。</p>
+<p><strong>2.JVM为实例分配内存</strong></p>
+<p>某类的实例所需的内存大小在类加载完成后便已完全确定，因此对于同一个类的不同实例，JVM所分配的内存空间都是完全相同的。</p>
+<p>有如下两种划分方式：</p>
+<ul>
+<li>指针碰撞(Bump the Pointer)：若堆中已用内存及空闲内存的划分是规整的，即我们可以设置一个指针作为分界线，在指针的一边的内存空间全部为已用空间，另一边的空间则全部为空闲空间。那么只要将指针向空闲空间那边移动相应空间的距离即可完成内存分配。</li>
+<li>空闲列表(Free List)：若堆中已用内存及空闲内存的划分不是规整的，那么JVM就需要维护一张空闲列表，每次需要分配新的内存空间时，就从空闲列表中找到一份足够大的空间，分配后再更新这个列表。</li>
+</ul>
+<p>而堆是否规整主要依垃圾收集器是否有压缩整理的功能而定。因此使用Serial及ParNew等带有压缩整理的垃圾收集器时采用指针碰撞。使用CMS这种基于Mark-Sweep算法的垃圾收集器时则采用空闲列表。</p>
+<p>分配内存空间时还应关注线程安全问题：例如采用指针碰撞时，线程1为对象a申请内存空间，指针还没来得及移动，线程2又为对象b申请了内存空间。解决策略主要有二：</p>
+<ul>
+<li>采用CAS配上失败重试的方式保证内存分配的原子性。</li>
+<li>为每个线程在堆中分配一小块内存，称为本地线程分配缓冲(Thread Local Allocation Buffer, TLAB)。只有当分配给某线程的堆空间不足需要扩展时才会进行同步控制。虚拟机 开启/关闭 TLAB可通过 -XX:+/-UseTLAB 参数设置。</li>
+</ul>
+<p><strong>3.初始化内存空间</strong></p>
+<p>除对象头外，JVM会将分配出去的内存空间都初始化为零值。该操作也是对象的实例成员变量未在代码中显式初始化也能直接使用的原因(当然，读到的结果为对应类型的零值)。相对的，方法中的局部变量就没有这个初始化的操作，因此必须显式声明，否则无法通过编译。</p>
+<p><strong>4.初始化对象头</strong></p>
+<p>对象头(Object Header)相当于该对象的描述信息，例如：</p>
+<ul>
+<li>这个对象是哪个类的实例</li>
+<li>如何才能找到类的元数据信息(即与方法区中存储的类的模版信息进行关联)</li>
+<li>对象的哈希码</li>
+<li>对象的GC分代年龄</li>
+</ul>
+<p>等。</p>
+<p>根据JVM当前运行状态的不同，例如是否启用偏向锁等，对象头会有不同的设置方式。</p>
+<p>至此，从JVM的角度来看，对象分配已然结束了，再接下来就是对象内部操作自己得到的内存了。</p>
+<p><strong>5.赋初值</strong></p>
+<p>&lt;init&gt;方法会将对象按照程序员的意愿进行初始化，即赋上程序员为实例字段设置的值，其内部会调用对象对应的构造函数。</p>
+<p>至此，一个对象的创建已经完成。</p>
+<h1 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h1><p>在HotSpot中，内存中存储的对象可分为3块：对象头(Header)，实例数据(Instance Data)和对齐填充(Padding)。</p>
+<p><strong>对象头</strong></p>
+<p>对象头又可分为两部分：Mark Word及类型指针。</p>
+<p>所谓Mark Word即为对象的运行时描述信息，如哈希码(HashCode)，GC分代年龄，锁状态标志，线程持有的锁，偏向线程ID，偏向时间戳等。在32位及64位(未开启指针压缩)的JVM上的长度分别为32及64位。实际上Mark Word中所存储的全部状态信息已无法用32位或64位完全表示，而Mark Word又只是一个与对象实际信息无关的描述信息，为了节省内存空间，Mark Word采用了一种非固定的数据结构：对象处于不同状态时需存储的状态信息不同，数据结构也不同。对象的状态列举如下：</p>
+<p><img src="/images/blog_pic/JVM/%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80/0.png" alt="0.png"></p>
+<p>例如标志为01，即对象状态为未锁定时，对于32位的JVM而言，2位用于存储标志信息，25位用于存储对象的哈希码，4位用于存储对象的分代年龄，1位固定为0。</p>
+<p>类型指针并非对象头中的必要元素。这牵涉到对象的访问定位。我们通过栈上的reference来访问堆上的对象，而如何定位，定位到哪里，JVM规范中并没有具体规定。目前主流的访问方式有两种：</p>
+<p>使用句柄：</p>
+<p><img src="/images/blog_pic/JVM/%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80/1.jpg" alt="1.jpg"></p>
+<p>使用直接指针(此时对象头中就要存储类型指针了)：</p>
+<p><img src="/images/blog_pic/JVM/%E5%A0%86%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E5%B8%83%E5%B1%80/2.jpg" alt="2.jpg"></p>
+<p>使用句柄的好处为reference中存储的为稳定的句柄地址，在对象被移动时(垃圾收集时移动对象是很常见的行为)只需要修改句柄中对象的实际地址，而reference中存储的句柄地址则无需修改。</p>
+<p>使用直接指针的好处为减少了一次指针定位。由于对象的访问非常频繁，因此积少成多这也节省了一笔非常可观的时间开销。</p>
+<p>HotSpot使用直接指针的方式来定位对象，因此对象头中需要存储类型指针。</p>
+<p>除Mark Word及类型指针外，若对象为数组，那么对象头中还必须有一块记录数组长度的区域。因为JVM可以通过普通对象的元数据确定其大小，却无法通过数组对象的元数据确定其大小。</p>
+<p><strong>实例数据</strong></p>
+<p>对象真正存储的有效信息，即各种类型的字段信息，包括从父类中继承而得的及在自身类中定义的。</p>
+<p>字段的存储顺序由JVM的分配策略参数(FieldsAllocationStyle)所确定，依分配策略参数无法确定顺序的字段则由字段在代码中的定义顺序而定(父类中定义的变量会出现在子类之前)。</p>
+<p>HotSpot默认的分配策略参数依类型所占用内存空间的大小降序排列： long/double ,int, short/char , byte/boolean ,oop(Ordinary Object Pointer，普通对象指针，即reference类型)。这样分配的好处在于宽度临近的类型总被分配在附近。</p>
+<p><strong>对齐填充</strong></p>
+<p>HotSpot的自动内存管理系统要求对象的起始地址必须是8字节的整数倍。因此当 对象头+实例数据 不是8字节的整数倍时，就以对齐填充的方式补全。该部分仅仅起到一个占位符的作用，不是必然会存在的(若 对象头+实例数据 恰好为8字节的整数倍该部分就不需要存在)。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/10/17/JVM-%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/" rel="prev" title="JVM-运行时数据区域">
+      <i class="fa fa-chevron-left"></i> JVM-运行时数据区域
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/10/26/JVM-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86/" rel="next" title="JVM-垃圾收集">
+      JVM-垃圾收集 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#对象的创建"><span class="nav-number">1.</span> <span class="nav-text">对象的创建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#对象的内存布局"><span class="nav-number">2.</span> <span class="nav-text">对象的内存布局</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">王艺凯</p>
+  <div class="site-description" itemprop="description">Thou Shalt Comment</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">188</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王艺凯</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

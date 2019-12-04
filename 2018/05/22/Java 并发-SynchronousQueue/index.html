@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="在[Java 并发-线程池](&#x2F;2017&#x2F;10&#x2F;03&#x2F;Java 并发-线程池&#x2F;)中，我们提到了一个线程池常用的阻塞队列：SynchronousQueue。当时对它的描述很简略，在这里再次摘录如下： SynchronousQueue 即直接提交队列。其实这已经不能算作一种队列了：它并没有容量，即容量为0。换句话说，任何一个对SynchronousQueue的写需要等待一个对SynchronousQu">
+<meta name="keywords" content="Java,并发,SynchronousQueue,无锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 并发-SynchronousQueue">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2018&#x2F;05&#x2F;22&#x2F;Java%20%E5%B9%B6%E5%8F%91-SynchronousQueue&#x2F;index.html">
+<meta property="og:site_name" content="ReimuWang&#39;s Blog">
+<meta property="og:description" content="在[Java 并发-线程池](&#x2F;2017&#x2F;10&#x2F;03&#x2F;Java 并发-线程池&#x2F;)中，我们提到了一个线程池常用的阻塞队列：SynchronousQueue。当时对它的描述很简略，在这里再次摘录如下： SynchronousQueue 即直接提交队列。其实这已经不能算作一种队列了：它并没有容量，即容量为0。换句话说，任何一个对SynchronousQueue的写需要等待一个对SynchronousQu">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-05-23T09:13:22.000Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2018/05/22/Java%20%E5%B9%B6%E5%8F%91-SynchronousQueue/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Java 并发-SynchronousQueue | ReimuWang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ReimuWang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/22/Java%20%E5%B9%B6%E5%8F%91-SynchronousQueue/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="王艺凯">
+      <meta itemprop="description" content="Thou Shalt Comment">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ReimuWang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 并发-SynchronousQueue
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-22 19:03:36" itemprop="dateCreated datePublished" datetime="2018-05-22T19:03:36+08:00">2018-05-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-05-23 17:13:22" itemprop="dateModified" datetime="2018-05-23T17:13:22+08:00">2018-05-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java-%E5%B9%B6%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">Java 并发</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在[Java 并发-线程池](/2017/10/03/Java 并发-线程池/)中，我们提到了一个线程池常用的阻塞队列：SynchronousQueue。当时对它的描述很简略，在这里再次摘录如下：</p>
+<p><strong>SynchronousQueue</strong></p>
+<p>即直接提交队列。其实这已经不能算作一种队列了：它并没有容量，即容量为0。换句话说，任何一个对SynchronousQueue的写需要等待一个对SynchronousQueue的读，反之亦然。因此，SynchronousQueue与其说是一个队列，更像是一个数据的中转站。</p>
+<a id="more"></a>
+
+<p>虽然当时没有细说，不过这实在是一个很奇特的队列了，那么它是如何实现的呢？</p>
+<p>SynchronousQueue内部使用了大量的无锁(CAS)操作来进行并发控制，作为一个队列，外部最关心也最常用的自然就是它的put()和take()方法了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public void put(E o) throws InterruptedException &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    if (o &#x3D;&#x3D; null) throw new NullPointerException();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    if (transferer.transfer(o, false, 0) &#x3D;&#x3D; null) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">        Thread.interrupted();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">        throw new InterruptedException();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">public E take() throws InterruptedException &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    Object e &#x3D; transferer.transfer(null, false, 0);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    if (e !&#x3D; null)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        return (E)e;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    Thread.interrupted();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    throw new InterruptedException();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+
+<p>实在是有趣！两个功能完全相反的方法内部调用的核心方法居然是同一个(正所谓殊途同归)，即transferer.transfer()方法。而transferer是SynchronousQueue的成员变量：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">private transient volatile Transferer transferer;</span></pre></td></tr></table></figure>
+
+<p>而Transferer是SynchronousQueue的静态内部类，它的代码很短，全部代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">abstract static class Transferer &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">     * @param e, 若e&#x3D;&#x3D;null，说明这是一次take()操作</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">     *           若e!&#x3D;null，说明这是一次put()操作</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">     * @param timed, 是否存在timeout时间</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">     * @param nanos, 在timed&#x3D;&#x3D;true的前提下，表示timeout的最大容忍时长</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">     * @return 为null表示本次操作失败(超时或者中断)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">     *         反之操作成功：take()时为取到的元素；put()时为新放入的元素</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    abstract Object transfer(Object e, boolean timed, long nanos);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这是一个抽象类，要想真的能new出实例，自然还需要非抽象的子类，我们来看一下SynchronousQueue的transferer是怎么new的，按照我们已有的经验，这种重要的成员变量的初始化一般都会在构造函数中，因此我们不妨看一下SynchronousQueue的构造函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public SynchronousQueue() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    this(false);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"> * fair, true - 线程等待队列为公平队列，即遵循FIFO</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"> *       false - 线程排序不定</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"> *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">public SynchronousQueue(boolean fair) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    transferer &#x3D; fair ? new TransferQueue() : new TransferStack();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这里提到了一个线程等待队列，后文将详述。很显然，SynchronousQueue针对这个线程等待队列是否公平设计了两种实现，我想这就是为什么Transferer被设计为抽象类的原因吧，显然，这两个类都应是Transferer的子类。这两个类也均为SynchronousQueue的静态内部类，这里只贴出它们的类定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">static final class TransferQueue extends Transferer</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">static final class TransferStack extends Transferer</span></pre></td></tr></table></figure>
+
+<p>接下来，就让我们详细说说这个线程等待队列吧！</p>
+<p>简单来说，我们可以认为SynchronousQueue实际上维护的就是这个线程等待队列，只不过它因为一些限制，使得外部观测者认为这个队列的容量为零。</p>
+<p>我们可以这样认为，线程等待队列中的元素是线程的请求。我们不妨举一个小例子，假设有如下线程等待队列：</p>
+<ul>
+<li><strong>元素1：</strong>线程1请求写入数据1</li>
+<li><strong>元素2：</strong>线程2请求写入数据2</li>
+<li><strong>元素3：</strong>线程3请求写入数据3</li>
+<li><strong>元素4：</strong>线程4请求写入数据4</li>
+<li><strong>元素5：</strong>线程4请求写入数据5</li>
+</ul>
+<p>此时来了一个新的请求，例如线程5请求写入数据5。它与队首元素1的请求类型相同，不符合SynchronousQueue的基本规定(任何一个对SynchronousQueue的写需要等待一个对SynchronousQueue的读，反之亦然)，线程5就会被存入线程等待队列的队首，</p>
+<ul>
+<li><strong>元素1：</strong>线程5请求写入数据5</li>
+<li><strong>元素2：</strong>线程1请求写入数据1</li>
+<li><strong>元素3：</strong>线程2请求写入数据2</li>
+<li><strong>元素4：</strong>线程3请求写入数据3</li>
+<li><strong>元素5：</strong>线程4请求写入数据4</li>
+</ul>
+<p>然后又来了一个新的请求：线程6请求读取数据。这与队首的元素1就不冲突了。此时元素1会被弹出，构成元素1-新请求的请求对，然后处理这个请求对。经过该步，线程等待队列变为:</p>
+<ul>
+<li><strong>元素1：</strong>完成状态请求对：线程5请求写入数据5-线程6请求读取数据</li>
+<li><strong>元素2：</strong>线程1请求写入数据1</li>
+<li><strong>元素3：</strong>线程2请求写入数据2</li>
+<li><strong>元素4：</strong>线程3请求写入数据3</li>
+<li><strong>元素5：</strong>线程4请求写入数据4</li>
+</ul>
+<p>请求对处理完成后，线程等待队列变为：</p>
+<ul>
+<li><strong>元素1：</strong>线程1请求写入数据1</li>
+<li><strong>元素2：</strong>线程2请求写入数据2</li>
+<li><strong>元素3：</strong>线程3请求写入数据3</li>
+<li><strong>元素4：</strong>线程4请求写入数据4</li>
+</ul>
+<p>介绍完核心思想，我们再以具体的实现TransferStack.transfer()为例，看看具体的源码是如何实现的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Object transfer(Object e, boolean timed, long nanos) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    SNode s &#x3D; null;    &#x2F;&#x2F; 封装当前请求的元素</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    int mode &#x3D; (e &#x3D;&#x3D; null) ? REQUEST : DATA;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    for (;;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        SNode h &#x3D; head;    &#x2F;&#x2F; 线程等待队列中的队首元素</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        if (h &#x3D;&#x3D; null || h.mode &#x3D;&#x3D; mode) &#123;    &#x2F;&#x2F; 队列为空，或队首元素与当前请求的类型相同(均为读，或均为写)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">            if (timed &amp;&amp; nanos &lt;&#x3D; 0) &#123;    &#x2F;&#x2F; 不进行等待</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">                if (h !&#x3D; null &amp;&amp; h.isCancelled())    &#x2F;&#x2F; 当前队首元素处于取消状态的话，帮助队首元素处理它的取消行为</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">                    casHead(h, h.next);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">                else</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">                    return null;    &#x2F;&#x2F; 直接判定为失败，新请求无法进入队列</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">            &#125; else if (casHead(h, s &#x3D; snode(s, e, h, mode))) &#123;    &#x2F;&#x2F; 将新请求生成为元素，并插入到队首且插入成功</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">                &#x2F;&#x2F; awaitFulfill()方法会进行自旋，若自旋结束后也未出现新的匹配请求(即当前元素为读的话，出现了为写的请求；或当前元素为写的话，出现了读的请求)，则会挂起线程</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">                &#x2F;&#x2F; 当匹配请求出现后，线程被唤醒</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">                SNode m &#x3D; awaitFulfill(s, timed, nanos);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">                if (m &#x3D;&#x3D; s) &#123;    &#x2F;&#x2F; 其他线程已帮助该元素完成了它的工作，后续流程取消</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">                    clean(s);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">                    return null;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">                &#x2F;&#x2F; 继续向下走了，说明没有接到别人的帮助</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">                if ((h &#x3D; head) !&#x3D; null &amp;&amp; h.next &#x3D;&#x3D; s)    &#x2F;&#x2F; 帮助临近的后续元素</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">                    casHead(h, s.next);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">                return (mode &#x3D;&#x3D; REQUEST) ? m.item : s.item;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">        &#125; else if (!isFulfilling(h.mode)) &#123;    &#x2F;&#x2F; 队首元素与当前请求的类型不同</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">            if (h.isCancelled())    &#x2F;&#x2F; 若该队首元素已在其他线程的帮助下被取消了</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">                casHead(h, h.next);    &#x2F;&#x2F; 弹出当前队首，并重试</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">            &#x2F;&#x2F; 能进入下面的else if说明当前已能构成请求对</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">            else if (casHead(h, s&#x3D;snode(s, e, h, FULFILLING|mode))) &#123;    &#x2F;&#x2F; 以当前请求对生成一个新的元素</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">                                                                         &#x2F;&#x2F; 将它置为完成态</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">                                                                         &#x2F;&#x2F; 并置于队首</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line">                for (;;) &#123;    &#x2F;&#x2F; 除非队列为空，否则一直检测匹配者</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line">                    SNode m &#x3D; s.next;    &#x2F;&#x2F; 设置m(原队列队首)为s(当前请求元素)的匹配者</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">36</span></pre></td><td class="code"><pre><span class="line">                    if (m &#x3D;&#x3D; null) &#123;    &#x2F;&#x2F; 循环到最后也没找到匹配者</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">37</span></pre></td><td class="code"><pre><span class="line">                        casHead(s, null);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">38</span></pre></td><td class="code"><pre><span class="line">                        s &#x3D; null;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">39</span></pre></td><td class="code"><pre><span class="line">                        break;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">40</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">41</span></pre></td><td class="code"><pre><span class="line">                    SNode mn &#x3D; m.next;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">42</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; tryMatch()会激活一个等待线程，并将m传递给那个线程</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">43</span></pre></td><td class="code"><pre><span class="line">                    if (m.tryMatch(s)) &#123;    &#x2F;&#x2F; 设置成功，数据投递完成</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">44</span></pre></td><td class="code"><pre><span class="line">                                            &#x2F;&#x2F; s,m均可弹出了</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">45</span></pre></td><td class="code"><pre><span class="line">                        casHead(s, mn);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">46</span></pre></td><td class="code"><pre><span class="line">                        return (mode &#x3D;&#x3D; REQUEST) ? m.item : s.item;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">47</span></pre></td><td class="code"><pre><span class="line">                    &#125; else    &#x2F;&#x2F; 设置失败</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">48</span></pre></td><td class="code"><pre><span class="line">                              &#x2F;&#x2F; 说明已有其他线程帮助完成了该工作</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">49</span></pre></td><td class="code"><pre><span class="line">                              &#x2F;&#x2F; 弹出m即可</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">50</span></pre></td><td class="code"><pre><span class="line">                        s.casNext(m, mn);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">51</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">52</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">53</span></pre></td><td class="code"><pre><span class="line">        &#125; else &#123;    &#x2F;&#x2F; 头部元素恰好是完成态</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">54</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; 说明此时恰有一个线程处于上一个else if中的匹配过程中</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">55</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; 那么对于当前线程而言，比起处理目前手中已有的新进请求</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">56</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; 更优先的事项是帮助其他线程完成这个完成态的元素</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">57</span></pre></td><td class="code"><pre><span class="line">            SNode m &#x3D; h.next;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">58</span></pre></td><td class="code"><pre><span class="line">            if (m &#x3D;&#x3D; null)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">59</span></pre></td><td class="code"><pre><span class="line">                casHead(h, null);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">60</span></pre></td><td class="code"><pre><span class="line">            else &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">61</span></pre></td><td class="code"><pre><span class="line">                SNode mn &#x3D; m.next;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">62</span></pre></td><td class="code"><pre><span class="line">                if (m.tryMatch(h))</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">63</span></pre></td><td class="code"><pre><span class="line">                    casHead(h, mn);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">64</span></pre></td><td class="code"><pre><span class="line">                else</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">65</span></pre></td><td class="code"><pre><span class="line">                    h.casNext(m, mn);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">66</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">67</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">68</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">69</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>值得关注的是，上文中有很多线程间互助的操作，例如：</p>
+<ul>
+<li><strong>第10行：</strong>当前队首元素处于取消状态的话，帮助队首元素处理它的取消行为</li>
+<li><strong>第18行：</strong>其他线程已帮助该元素完成了它的工作，后续流程取消</li>
+<li><strong>第23行：</strong>帮助临近的后续元素</li>
+<li><strong>第56行：</strong>更优先的事项是帮助其他线程完成这个完成态的元素</li>
+</ul>
+<p>由此可知，在SynchronousQueue中，线程间不再仅仅只是竞争关系了，还体现着一种协作：线程进入线程等待队列意味着被挂起，那么那些没挂起的，还尚有余力的线程就可以帮助其他线程完成任务，这种模式可以更大程度上减少饥饿的可能，提高系统整体的并行性。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E5%B9%B6%E5%8F%91/" rel="tag"># 并发</a>
+              <a href="/tags/SynchronousQueue/" rel="tag"># SynchronousQueue</a>
+              <a href="/tags/%E6%97%A0%E9%94%81/" rel="tag"># 无锁</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/05/20/Java%20AWT-%E4%BB%A5%E5%83%8F%E7%B4%A0%E4%B8%BA%E5%8D%95%E4%BD%8D%E6%93%8D%E7%BA%B5%E5%9B%BE%E7%89%87/" rel="prev" title="Java AWT-以像素为单位操纵图片">
+      <i class="fa fa-chevron-left"></i> Java AWT-以像素为单位操纵图片
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/05/23/Java%20%E5%B9%B6%E5%8F%91-%E5%93%B2%E5%AD%A6%E5%AE%B6%E5%B0%B1%E9%A4%90%E9%97%AE%E9%A2%98/" rel="next" title="Java 并发-哲学家就餐问题">
+      Java 并发-哲学家就餐问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">王艺凯</p>
+  <div class="site-description" itemprop="description">Thou Shalt Comment</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">188</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王艺凯</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="一般来说，在公司或组织规模较小的发展期，都是以做项目为主，即会不断的做新项目。此时应用新技术几乎是零成本的，只要确定新技术可用，直接在新项目中使用即可。">
+<meta name="keywords" content="Java,反射">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 反射-逆向移植">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2017&#x2F;12&#x2F;19&#x2F;Java%20%E5%8F%8D%E5%B0%84-%E9%80%86%E5%90%91%E7%A7%BB%E6%A4%8D&#x2F;index.html">
+<meta property="og:site_name" content="ReimuWang&#39;s Blog">
+<meta property="og:description" content="一般来说，在公司或组织规模较小的发展期，都是以做项目为主，即会不断的做新项目。此时应用新技术几乎是零成本的，只要确定新技术可用，直接在新项目中使用即可。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-10-10T09:44:10.000Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2017/12/19/Java%20%E5%8F%8D%E5%B0%84-%E9%80%86%E5%90%91%E7%A7%BB%E6%A4%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Java 反射-逆向移植 | ReimuWang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ReimuWang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/19/Java%20%E5%8F%8D%E5%B0%84-%E9%80%86%E5%90%91%E7%A7%BB%E6%A4%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="王艺凯">
+      <meta itemprop="description" content="Thou Shalt Comment">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ReimuWang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 反射-逆向移植
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-12-19 16:31:49" itemprop="dateCreated datePublished" datetime="2017-12-19T16:31:49+08:00">2017-12-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-10-10 17:44:10" itemprop="dateModified" datetime="2018-10-10T17:44:10+08:00">2018-10-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java-%E5%8F%8D%E5%B0%84/" itemprop="url" rel="index">
+                    <span itemprop="name">Java 反射</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>一般来说，在公司或组织规模较小的发展期，都是以做项目为主，即会不断的做新项目。此时应用新技术几乎是零成本的，只要确定新技术可用，直接在新项目中使用即可。</p>
+<a id="more"></a>
+
+<p>随着组织的发展，工作的重心虽然依然是做新项目，但维护已有项目的压力也已初现端倪。对于已有项目而言，替换新技术或新架构不再是零成本了，不过因为项目本身不大，终归是可做的。</p>
+<p>当组织达到一定规模后，就会从做项目转为做产品。此时工作的重心将转移到维护已有项目上。同时这些已有项目已经有了足够的技术积淀，规模也足够庞大，此时再试图替换新技术就是一件极为困难的事了。</p>
+<p>然而互联网行业日新月异，应用新技术，保持自身产品的竞争力又是必须的。时至今日，这组矛盾依然是程序员们所必须面对的一大挑战。</p>
+<p>具体到Java，每次大的JDK版本的升级既是一场狂欢，又是一场灾难。喜的是可以在Java中使用很多梦寐以求的新技术，悲的是新版本的学习成本倒尚在其次，如何平滑的将新版本应用于已有项目才是难点所在。例如JDK1.5中发布了自动装箱，泛型，动态注解，枚举，变长参数，增强for循环等影响深远的新功能，不用吧，看着实在是眼红。用吧，旧版本的代码又不能兼容，总之是陷入两难的境地中。</p>
+<p>很多公司干脆采取了简单粗暴的做法：如果这次JDK的大版本更新所带来的新内容足够震撼，那么干脆就舍弃旧代码，用新版本做一次重构。这样的好处自然是简单粗暴，坏处却也很明显：如果项目规模已足够大，那么重构本身是很花成本的事情。此外，JDK最近的大版本有日渐提速的趋势，照顾着JDK版本进行重构显然不利于项目的架构规划。</p>
+<p>为此，Java逆向移植工具(Java Backporting Tools)应运而生。本文将介绍其中的佼佼者：Retrotranslator。</p>
+<p>Retrotranslator的作用是将JDK1.5编译出的class文件转换为可在JDK1.4或JDK1.3上部署的版本。转换后依然可以很好的支持自动装箱，泛型，动态注解，枚举，变长参数，增强for循环，静态导入等语法特性。甚至还可以支持JDK1.5中新增的集合改进，并发包以及对泛型，注解等的反射操作。</p>
+<p>那么Retrotranslator是如何做到的呢？在讨论这个问题之前，我们需要先明确一下，一次JDK的大版本更新通常会提供哪些新内容。简单来说，可分为以下4类：</p>
+<ol>
+<li>javac编译器层面的改进。如JDK1.5新增的自动装箱拆箱，其本质实际上就是编译器在程序中使用到包装类对象的地方自动插入了很多诸如Integer.valueOf()之类的代码。JDK1.5提供的变长参数则是在javac编译后会被自动转化为数组。而对于JDK1.5新增的泛型，则会在编译阶段直接被javac编译器擦除(不过在元数据中依然还保留着泛型相关的信息)，同时在相应的地方由javac编译器自动插入类型转换代码。</li>
+<li>增加Java API。例如JDK1.2时新增的java.util.Collections等一系列集合框架类。JDK1.5时新增的java.util.concurrent并发包等。</li>
+<li>更新底层的字节码指令集。这种改动相对少见。例如JDK1.7新增的动态类型支持，就需要在字节码指令集中新增一条指令invokedynamic。</li>
+<li>改进JVM。这类改动往往会从本质上影响程序的性能，但对程序员开发代码而言却基本是透明的。例如JDK1.5时重新定义了Java内存模型(Java Memory Model,JMM)等。</li>
+</ol>
+<p>在这4种改动中，Retrotranslator等逆向移植工具只能模拟前两种。这其实很好理解：逆向移植工具所做的工作仅仅只是转换class文件，相当于二次编译。因为依然是跑在旧版本的JVM内，那么JVM内部的优化自然是无法模拟，或者更精确的说，是无法做到完全的模拟，而且能模拟的部分，也一定是用一个取巧的手段，以牺牲性能为代价，最终达到一种似是而非的效果。</p>
+<p>我们再具体到能模拟的那前两种改动中。其中第二种改动的模拟是要相对容易些的。因为所谓的Java API层面的改进无非就是加入或者更新了一部分代码。而这一部分代码所使用的底层指令集其实还是老版本那一套，因此只要在转换时将缺少的代码补上即可。例如JDK1.5中新增的java.util.concurrent并发包，实际上是由多线程大师Doug Lea在JDK1.5之前就已经开发好的一套并发包(那时被称为dl.util.concurrent)。因其性能卓越，在JDK1.5时被作为标准API引入Java核心API类库，引入后定名为java.util.concurrent，其内容基本与原始的dl.util.concurrent一致，只是由作者及JDK的开发人员一起做了小幅的改动。Retrotranslator中替代java.util.concurrent并发包的类库为另一个基于dl.util.concurrent改进而得的并发包类库backport-util-concurrent.jar。</p>
+<p>而对于第一种改进的模拟则要复杂得多了。Retrotranslator的实现方式为通过ASM框架直接操作字节码。最容易想到也最为简单的需改动的内容就是改动class文件中的minor_version。当然实际需要改动得要比这个复杂得多，不过这一切都是可做的。而这个可做的基础就在于这些改动都是可以收束到javac编译器这一层的，更直白的说，这种改动根本不涉及JVM，因此我们才可以采用这种类似于二次编译的方式实现它。</p>
+<p>我们不妨以JDK1.5时新增的枚举为例。虽然从程序员的角度来看，引入了全新的关键字enum，同时Enum也仿佛是与Class及Interface并列的第三种类型，但这一切其实都是javac编译器做出来的假象。实际上，在编译为class文件之后，从JVM的角度来看，枚举类仅仅是一个继承于java.lang.Enum，自动生成values()及valueOf()方法的普通Java类而已。既然不需要JVM新功能的支持那么逆向移植工具就可以通过二次编译在旧版本JDK环境中实现枚举了，因为class文件常量池集合中描述枚举时用的依然是CONSTANT_Class_info，也就是javac也是依然将枚举当成一个类来看的，并未为了枚举添加CONSTANT_Enum_info之类的枚举符号引用常量。</p>
+<p>Retrotranslator对于枚举的整体思路为首先将枚举类的父类从java.lang.Enum替换为它自身所包含的net.sf.retrotranslator.runtime.java.lang.Enum_，然后再在类和字段的访问标志中抹去ACC_ENUM标志位。当然这其中有很多复杂的细节，例如既然父类被替换了，那么values()及valueOf()方法自然需要重写，常量池中也要引入大量来自新父类的符号引用。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E5%8F%8D%E5%B0%84/" rel="tag"># 反射</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/12/19/Java%20%E5%8F%8D%E5%B0%84-%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" rel="prev" title="Java 反射-动态代理">
+      <i class="fa fa-chevron-left"></i> Java 反射-动态代理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/12/29/Java%20%E5%B9%B6%E5%8F%91-Condition%E6%9D%A1%E4%BB%B6/" rel="next" title="Java 并发-Condition条件">
+      Java 并发-Condition条件 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">王艺凯</p>
+  <div class="site-description" itemprop="description">Thou Shalt Comment</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">188</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王艺凯</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
