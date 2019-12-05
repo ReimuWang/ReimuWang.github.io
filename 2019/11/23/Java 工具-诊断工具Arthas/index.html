@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#222">
 <meta name="generator" content="Hexo 4.0.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/myLogo32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/myLogo16.png">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
 <link rel="stylesheet" href="/css/main.css">
@@ -24,7 +24,7 @@
     scheme: 'Mist',
     version: '7.6.0',
     exturl: false,
-    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    sidebar: {"position":"right","display":"always","padding":18,"offset":12,"onmobile":true},
     copycode: {"enable":false,"show_result":false,"style":null},
     back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
     bookmark: {"enable":false,"color":"#222","save":"auto"},
@@ -53,8 +53,17 @@
 <meta property="og:site_name" content="ReimuWang&#39;s Blog">
 <meta property="og:description" content="官方在线文档 最新离线文档  java自带的诊断工具可参见JVM-JDK自带JVM工具 注意：即便是同一个一级标题下，本文中的示例也不一定是来自于同一次运行，线程id及程序状态均可能会不同。请独立看待。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-30T08:43:37.009Z">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;Java%E5%B7%A5%E5%85%B7&#x2F;%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas&#x2F;0.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;Java%E5%B7%A5%E5%85%B7&#x2F;%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas&#x2F;1.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;Java%E5%B7%A5%E5%85%B7&#x2F;%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas&#x2F;2.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;Java%E5%B7%A5%E5%85%B7&#x2F;%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas&#x2F;3.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;Java%E5%B7%A5%E5%85%B7&#x2F;%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas&#x2F;4.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;Java%E5%B7%A5%E5%85%B7&#x2F;%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas&#x2F;5.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;Java%E5%B7%A5%E5%85%B7&#x2F;%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas&#x2F;6.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;Java%E5%B7%A5%E5%85%B7&#x2F;%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas&#x2F;7.jpg">
+<meta property="og:updated_time" content="2019-12-04T17:40:58.393Z">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;images&#x2F;blog_pic&#x2F;Java%E5%B7%A5%E5%85%B7&#x2F;%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas&#x2F;0.jpg">
 
 <link rel="canonical" href="http://yoursite.com/2019/11/23/Java%20%E5%B7%A5%E5%85%B7-%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/">
 
@@ -140,17 +149,17 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">188</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">25</span></a>
 
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">113</span></a>
 
   </li>
   </ul>
@@ -182,7 +191,7 @@
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/11/23/Java%20%E5%B7%A5%E5%85%B7-%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="/avatar.jpg">
       <meta itemprop="name" content="王艺凯">
       <meta itemprop="description" content="Thou Shalt Comment">
     </span>
@@ -209,7 +218,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-11-30 16:43:37" itemprop="dateModified" datetime="2019-11-30T16:43:37+08:00">2019-11-30</time>
+                <time title="修改时间：2019-12-05 01:40:58" itemprop="dateModified" datetime="2019-12-05T01:40:58+08:00">2019-12-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -268,7 +277,7 @@
 <p>关联某java进程x后，x会在其日志中打印如下类似的日志：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Sat Nov 30 16:11:22 CST 2019 com.taobao.arthas.agent.ArthasClassloader@53d56b1d JM.Log:INFO Log root path: &#x2F;Users&#x2F;reimuwang&#x2F;logs&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Sat Nov 30 16:11:22 CST 2019 com.taobao.arthas.agent.ArthasClassloader@53d56b1d JM.Log:INFO Set arthas log path: &#x2F;Users&#x2F;reimuwang&#x2F;logs&#x2F;arthas</span></pre></td></tr></table></figure>
 
-<h1 id="dashboard"><a href="#dashboard" class="headerlink" title="dashboard"></a>dashboard</h1><p>![0.jpg](/images/blog_pic/Java 工具/诊断工具Arthas/0.jpg)</p>
+<h1 id="dashboard"><a href="#dashboard" class="headerlink" title="dashboard"></a>dashboard</h1><p><img src="/images/blog_pic/Java%E5%B7%A5%E5%85%B7/%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/0.jpg" alt="0.jpg"></p>
 <p>实时数据面板，每隔5秒刷新一次，展示结果铺满整个屏幕。其中最上方的区域显示的是线程的信息，部分字段含义：</p>
 <ul>
 <li>CPU%: 线程消耗的cpu占比，采样间隔100ms，将所有线程在这100ms内的cpu使用量求和，再算出每个线程的cpu使用占比。</li>
@@ -277,23 +286,23 @@
 </ul>
 <h1 id="thread"><a href="#thread" class="headerlink" title="thread"></a>thread</h1><p><strong>基本用法</strong></p>
 <p>首先是最简单的用法，只输入thread：</p>
-<p>![1.jpg](/images/blog_pic/Java 工具/诊断工具Arthas/1.jpg)</p>
+<p><img src="/images/blog_pic/Java%E5%B7%A5%E5%85%B7/%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/1.jpg" alt="1.jpg"></p>
 <p>如上图所示，该命令返回了该java进程当前所有的线程信息，基本结构和dashboard命令返回的线程信息差不多，只是稍稍详细了一些。</p>
 <p><strong>降低统计对cpu的消耗</strong></p>
 <p>如果我们足够细心，我们会发现一个问题，前文dashboard命令得到的占用cpu最多的线程名为Timer-for-arthas-dashboard-a6aecff6-bac7-4a，而上图中占用cpu最多的线程名为as-command-execute-daemon。很显然这些线程都与arthas有关。因为我的demo程序并没有执行什么操作，因此这个这个问题看起来会比较明显。之所以会这样，是因为统计cpu消耗时底层调用的是<code>java.lang.management.ThreadMXBean#getThreadCpuTime</code>这个接口，其本身就会产生一定的开销(JDK这个接口本身开销比较大)，为了降低统计自身的开销带来的影响，可以把采样间隔拉长一些，比如5000毫秒。这里需要使用-i参数：</p>
-<p>![2.jpg](/images/blog_pic/Java 工具/诊断工具Arthas/2.jpg)</p>
+<p><img src="/images/blog_pic/Java%E5%B7%A5%E5%85%B7/%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/2.jpg" alt="2.jpg"></p>
 <p>本次统计一共用了5秒，同时as-command-execute-daemon对cpu的占用也大幅下降。</p>
 <p><strong>查看当前最为繁忙的n个线程的堆栈</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[arthas@74666]$ thread -n 3</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&quot;as-command-execute-daemon&quot; Id&#x3D;49 cpuUsage&#x3D;100% RUNNABLE</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    at sun.management.ThreadImpl.dumpThreads0(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    at sun.management.ThreadImpl.getThreadInfo(ThreadImpl.java:448)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    at com.taobao.arthas.core.command.monitor200.ThreadCommand.processTopBusyThreads(ThreadCommand.java:179)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    at com.taobao.arthas.core.command.monitor200.ThreadCommand.process(ThreadCommand.java:100)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    at com.taobao.arthas.core.shell.command.impl.AnnotatedCommandImpl.process(AnnotatedCommandImpl.java:82)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    at com.taobao.arthas.core.shell.command.impl.AnnotatedCommandImpl.access$100(AnnotatedCommandImpl.java:18)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    at com.taobao.arthas.core.shell.command.impl.AnnotatedCommandImpl$ProcessHandler.handle(AnnotatedCommandImpl.java:111)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    at com.taobao.arthas.core.shell.command.impl.AnnotatedCommandImpl$ProcessHandler.handle(AnnotatedCommandImpl.java:108)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    at com.taobao.arthas.core.shell.system.impl.ProcessImpl$CommandProcessTask.run(ProcessImpl.java:370)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    at java.lang.Thread.run(Thread.java:748)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    Number of locked synchronizers &#x3D; 1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    - java.util.concurrent.ThreadPoolExecutor$Worker@25a0439</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">&quot;Reference Handler&quot; Id&#x3D;2 cpuUsage&#x3D;0% WAITING on java.lang.ref.Reference$Lock@5349f16a</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    at java.lang.Object.wait(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">    -  waiting on java.lang.ref.Reference$Lock@5349f16a</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    at java.lang.Object.wait(Object.java:502)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">    at java.lang.ref.Reference.tryHandlePending(Reference.java:191)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">    at java.lang.ref.Reference$ReferenceHandler.run(Reference.java:153)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">&quot;Finalizer&quot; Id&#x3D;3 cpuUsage&#x3D;0% WAITING on java.lang.ref.ReferenceQueue$Lock@6cedb7df</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">    at java.lang.Object.wait(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">    -  waiting on java.lang.ref.ReferenceQueue$Lock@6cedb7df</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">    at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:144)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">    at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:165)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">    at java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:216)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">36</span></pre></td><td class="code"><pre><span class="line">Affect(row-cnt:0) cost in 135 ms.</span></pre></td></tr></table></figure>
 
 <p><strong>精确查看某个线程的堆栈</strong></p>
 <p>如果我们已知线程id，还可以精确搜索某个线程的详细堆栈信息。例如处于RUNNABLE状态的线程107：</p>
-<p>![3.jpg](/images/blog_pic/Java 工具/诊断工具Arthas/3.jpg)</p>
+<p><img src="/images/blog_pic/Java%E5%B7%A5%E5%85%B7/%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/3.jpg" alt="3.jpg"></p>
 <p>再比如处于WAITING状态的线程76：</p>
-<p>![4.jpg](/images/blog_pic/Java 工具/诊断工具Arthas/4.jpg)</p>
+<p><img src="/images/blog_pic/Java%E5%B7%A5%E5%85%B7/%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/4.jpg" alt="4.jpg"></p>
 <p>以及处于TIMED_WAITING状态的线程68：</p>
-<p>![5.jpg](/images/blog_pic/Java 工具/诊断工具Arthas/5.jpg)</p>
-<p>关于线程状态的详细信息可参见[Java 并发-线程状态转换](/2017/07/12/Java 并发-线程状态转换/)。</p>
+<p><img src="/images/blog_pic/Java%E5%B7%A5%E5%85%B7/%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/5.jpg" alt="5.jpg"></p>
+<p>关于线程状态的详细信息可参见<a href="/2017/07/12/Java并发-线程状态转换/">Java 并发-线程状态转换</a>。</p>
 <p><strong>thread -b, 找出当前阻塞其他线程的线程</strong></p>
 <p>有时候我们发现应用卡住了， 通常是由于某个线程拿住了某个锁， 并且其他线程都在等待这把锁造成的。 为了排查这类问题， arthas提供了<code>thread -b</code>， 一键找出那个罪魁祸首:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[arthas@74666]$ thread -b</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">No most blocking thread found!</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Affect(row-cnt:0) cost in 28 ms.</span></pre></td></tr></table></figure>
@@ -302,7 +311,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">public class TestWait &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">        Runnable r1 &#x3D; () -&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">            synchronized (&quot;八云紫&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">                try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">                    Thread.sleep(100);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">                &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">                    e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">                synchronized (&quot;八云蓝&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        Runnable r2 &#x3D; () -&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">            synchronized (&quot;八云蓝&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">                try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">                    Thread.sleep(100);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">                &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">                    e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">                synchronized (&quot;八云紫&quot;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">        new Thread(r1, &quot;r1&quot;).start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">        new Thread(r2, &quot;r2&quot;).start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
 <p>该程序的thead指令返回：</p>
-<p>![6.jpg](/images/blog_pic/Java 工具/诊断工具Arthas/6.jpg)</p>
+<p><img src="/images/blog_pic/Java%E5%B7%A5%E5%85%B7/%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/6.jpg" alt="6.jpg"></p>
 <p>果然，r1及r2都BLOCKED了。然后再看一下<code>thread -b</code>：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[arthas@74987]$ thread -b</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&quot;r1&quot; Id&#x3D;11 BLOCKED on java.lang.String@61dac22c owned by &quot;r2&quot; Id&#x3D;12</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    at org.reimuwang.testspringboot.test.TestWait.lambda$main$0(TestWait.java:14)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    -  blocked on java.lang.String@61dac22c</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    -  locked java.lang.String@37f2e232 &lt;---- but blocks 1 other threads!</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    at org.reimuwang.testspringboot.test.TestWait$$Lambda$1&#x2F;94438417.run(Unknown Source)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    at java.lang.Thread.run(Thread.java:748)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">Affect(row-cnt:0) cost in 15 ms.</span></pre></td></tr></table></figure>
 
@@ -311,7 +320,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.concurrent.locks.ReentrantLock;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">public class TestWait &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">        ReentrantLock lock1 &#x3D; new ReentrantLock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        ReentrantLock lock2 &#x3D; new ReentrantLock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        Runnable r1 &#x3D; () -&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">            lock1.lock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">            try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">                Thread.sleep(100);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">            &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">                e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">            lock2.lock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">            lock2.unlock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">            lock1.unlock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">        Runnable r2 &#x3D; () -&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">            lock2.lock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">            try &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">                Thread.sleep(100);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">            &#125; catch (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">                e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">            lock1.lock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">            lock1.unlock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">            lock2.unlock();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">        &#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">        new Thread(r1, &quot;r1&quot;).start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">        new Thread(r2, &quot;r2&quot;).start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
 <p>该程序的thread输出：</p>
-<p>![7.jpg](/images/blog_pic/Java 工具/诊断工具Arthas/7.jpg)</p>
+<p><img src="/images/blog_pic/Java%E5%B7%A5%E5%85%B7/%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/7.jpg" alt="7.jpg"></p>
 <p>看起来r1和r2都是WAITING，没有被判定为BLOCKED，不过当我们执行<code>thread -b</code>时：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[arthas@75117]$ thread -b</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&quot;r1&quot; Id&#x3D;11 WAITING on java.util.concurrent.locks.ReentrantLock$NonfairSync@442fbfe0 owned by &quot;r2&quot; Id&#x3D;12</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    at sun.misc.Unsafe.park(Native Method)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    -  waiting on java.util.concurrent.locks.ReentrantLock$NonfairSync@442fbfe0</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    at java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    at java.util.concurrent.locks.AbstractQueuedSynchronizer.parkAndCheckInterrupt(AbstractQueuedSynchronizer.java:836)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireQueued(AbstractQueuedSynchronizer.java:870)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquire(AbstractQueuedSynchronizer.java:1199)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    at java.util.concurrent.locks.ReentrantLock$NonfairSync.lock(ReentrantLock.java:209)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    at java.util.concurrent.locks.ReentrantLock.lock(ReentrantLock.java:285)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    at org.reimuwang.testspringboot.test.TestWait.lambda$main$0(TestWait.java:17)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    at org.reimuwang.testspringboot.test.TestWait$$Lambda$1&#x2F;812265671.run(Unknown Source)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    at java.lang.Thread.run(Thread.java:748)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">    Number of locked synchronizers &#x3D; 1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    - java.util.concurrent.locks.ReentrantLock$NonfairSync@77d0d027 &lt;---- but blocks 1 other threads!</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">Affect(row-cnt:0) cost in 13 ms.</span></pre></td></tr></table></figure>
 
@@ -326,13 +335,31 @@
     
     
     
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>王艺凯
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/http:/yoursite.com/2019/11/23/Java%20%E5%B7%A5%E5%85%B7-%E8%AF%8A%E6%96%AD%E5%B7%A5%E5%85%B7Arthas/" title="Java 工具-诊断工具Arthas">http://yoursite.com/2019/11/23/Java 工具-诊断工具Arthas/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
 
       <footer class="post-footer">
+          
           <div class="post-tags">
-              <a href="/tags/Java/" rel="tag"># Java</a>
-              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"># 工具</a>
-              <a href="/tags/%E8%AF%8A%E6%96%AD/" rel="tag"># 诊断</a>
-              <a href="/tags/Arthas/" rel="tag"># Arthas</a>
+              <a href="/tags/Java/" rel="tag"><i class="fa fa-tag"></i> Java</a>
+              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"><i class="fa fa-tag"></i> 工具</a>
+              <a href="/tags/%E8%AF%8A%E6%96%AD/" rel="tag"><i class="fa fa-tag"></i> 诊断</a>
+              <a href="/tags/Arthas/" rel="tag"><i class="fa fa-tag"></i> Arthas</a>
           </div>
 
         
@@ -388,6 +415,8 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="王艺凯"
+      src="/avatar.jpg">
   <p class="site-author-name" itemprop="name">王艺凯</p>
   <div class="site-description" itemprop="description">Thou Shalt Comment</div>
 </div>
@@ -414,9 +443,22 @@
       </div>
   </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ReimuWang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ReimuWang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1505580759@qq.com" title="E-Mail → mailto:1505580759@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
 
 
-
+<div id="music163player">
+  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=470795480&auto=0&height=66"></iframe>
+</div>
       </div>
 
     </div>
@@ -433,18 +475,13 @@
 
 <div class="copyright">
   
-  &copy; 
+  &copy; 2017 – 
   <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">王艺凯</span>
+  <span class="author" itemprop="copyrightHolder">果冻保护协会</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
-  </div>
-  <span class="post-meta-divider">|</span>
-  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.6.0
-  </div>
 
         
 
