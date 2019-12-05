@@ -3577,24 +3577,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Leetcode Algorithms-26.Remove Duplicates from Sorted Array</title>
-    <url>/2018/05/30/Leetcode%20Algorithms-26Remove%20DuplicatesfromSortedArray/</url>
-    <content><![CDATA[<h1 id="问题地址"><a href="#问题地址" class="headerlink" title="问题地址"></a>问题地址</h1><p><a href="https://leetcode.com/problems/remove-duplicates-from-sorted-array/description/" target="_blank" rel="noopener">Remove Duplicates from Sorted Array - LeetCode</a></p>
-<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>![0.jpg](/images/blog_pic/Leetcode Algorithms/26Remove DuplicatesfromSortedArray/0.jpg)</p>
-<a id="more"></a>
-
-<h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><p><strong>代码</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public class Solution &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    public int removeDuplicates(int[] nums) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        if (null &#x3D;&#x3D; nums || nums.length &#x3D;&#x3D; 0) return 0;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        int lastIndex &#x3D; 0;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        for (int i &#x3D; 0; i &lt; nums.length; i++) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            if (nums[lastIndex] &#x3D;&#x3D; nums[i]) continue;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            nums[++lastIndex] &#x3D; nums[i];</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        return lastIndex + 1;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>Leetcode Algorithms</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>Leetcode</tag>
-        <tag>Algorithms</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Leetcode Algorithms-21.Merge Two Sorted Lists</title>
     <url>/2018/05/30/Leetcode%20Algorithms-21MergeTwoSortedLists/</url>
     <content><![CDATA[<h1 id="问题地址"><a href="#问题地址" class="headerlink" title="问题地址"></a>问题地址</h1><p><a href="https://leetcode.com/problems/merge-two-sorted-lists/description/" target="_blank" rel="noopener">Merge Two Sorted Lists - LeetCode</a></p>
@@ -3605,6 +3587,24 @@
 <p>注意在迭代的过程中不要将链表弄断即可。</p>
 <p><strong>代码</strong></p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;**</span></pre></td></tr><tr><td class="code"><pre><span class="line"> * Definition for singly-linked list.</span></pre></td></tr><tr><td class="code"><pre><span class="line"> * public class ListNode &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line"> *     int val;</span></pre></td></tr><tr><td class="code"><pre><span class="line"> *     ListNode next;</span></pre></td></tr><tr><td class="code"><pre><span class="line"> *     ListNode(int x) &#123; val &#x3D; x; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"> * &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"> *&#x2F;</span></pre></td></tr><tr><td class="code"><pre><span class="line">public class Solution &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    public ListNode mergeTwoLists(ListNode l1, ListNode l2) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        ListNode l1Current &#x3D; l1;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        ListNode l2Current &#x3D; l2;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        if (null &#x3D;&#x3D; l1Current) return l2Current;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        if (null &#x3D;&#x3D; l2Current) return l1Current;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        ListNode head &#x3D; null;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        if (l1Current.val &lt; l2Current.val) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            head &#x3D; l1Current;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            l1Current &#x3D; l1Current.next;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125; else &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            head &#x3D; l2Current;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            l2Current &#x3D; l2Current.next;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        ListNode current &#x3D; head;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        while (null !&#x3D; l1Current &amp;&amp; null !&#x3D; l2Current) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            if (l1Current.val &lt; l2Current.val) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                current.next &#x3D; l1Current;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                l1Current &#x3D; l1Current.next;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125; else &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                current.next &#x3D; l2Current;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                l2Current &#x3D; l2Current.next;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            current &#x3D; current.next;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        if (null &#x3D;&#x3D; l1Current) current.next &#x3D; l2Current;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        if (null &#x3D;&#x3D; l2Current) current.next &#x3D; l1Current;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        return head;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">class ListNode &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    int val;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    ListNode next;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    ListNode(int x) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        val &#x3D; x;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>Leetcode Algorithms</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Leetcode</tag>
+        <tag>Algorithms</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Leetcode Algorithms-26.Remove Duplicates from Sorted Array</title>
+    <url>/2018/05/30/Leetcode%20Algorithms-26Remove%20DuplicatesfromSortedArray/</url>
+    <content><![CDATA[<h1 id="问题地址"><a href="#问题地址" class="headerlink" title="问题地址"></a>问题地址</h1><p><a href="https://leetcode.com/problems/remove-duplicates-from-sorted-array/description/" target="_blank" rel="noopener">Remove Duplicates from Sorted Array - LeetCode</a></p>
+<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>![0.jpg](/images/blog_pic/Leetcode Algorithms/26Remove DuplicatesfromSortedArray/0.jpg)</p>
+<a id="more"></a>
+
+<h1 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h1><p><strong>代码</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public class Solution &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    public int removeDuplicates(int[] nums) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        if (null &#x3D;&#x3D; nums || nums.length &#x3D;&#x3D; 0) return 0;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        int lastIndex &#x3D; 0;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        for (int i &#x3D; 0; i &lt; nums.length; i++) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            if (nums[lastIndex] &#x3D;&#x3D; nums[i]) continue;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            nums[++lastIndex] &#x3D; nums[i];</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        return lastIndex + 1;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>Leetcode Algorithms</category>
       </categories>
@@ -10260,6 +10260,30 @@
       </tags>
   </entry>
   <entry>
+    <title>Java 并发-碎片</title>
+    <url>/2017/09/29/Java%20%E5%B9%B6%E5%8F%91-%E7%A2%8E%E7%89%87/</url>
+    <content><![CDATA[<h1 id="并发与并行"><a href="#并发与并行" class="headerlink" title="并发与并行"></a>并发与并行</h1><p>并发(Concurrency)是指在一个”时间段”内多任务同时进行。并行(Parallelism)是指在一个”时间点”上多任务同时进行。</p>
+<p>显然我们可以认为并行是并发的子集，因为一个时间段涵盖了无数的时间点。并发如果能做到在其时间段内的每个时间点都是多任务同时进行，那么就会特化为并行；如果做不到，那么在那些做不到的时间点上，任务其实还是串行的，只是通过CPU的调度轮转让各任务都有机会执行，如果这个轮转的时间间隔足够短，就会给观测的人造成”这些任务都是在并行执行”的错觉。</p>
+<p>因为一个CPU(多核架构中指CPU的一个核)一次只能执行一条指令。因此如果只有一个CPU，那么只能实现并发，无论如何也无法实现并行。</p>
+<p>从外部观测者的视角来看，并行和并发的结果是一致的：除非强迫症患者，一般我们是不会纠结于是否真的”同时在进行”。因此通常并不严格区分并发与并行。更常见的情况是，我们往往只会使用并发这个说法。</p>
+<a id="more"></a>
+
+<h1 id="并发的意义"><a href="#并发的意义" class="headerlink" title="并发的意义"></a>并发的意义</h1><ol>
+<li><p>充分利用多处理器的性能。</p>
+</li>
+<li><p>我们所身处的世界本质上就是并发的，因此如果所要模拟实现的系统已经较为复杂，使用并发也是更自然合理的做法。</p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Java 并发</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>并发</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java 并发-线程优先级</title>
     <url>/2017/09/29/Java%20%E5%B9%B6%E5%8F%91-%E7%BA%BF%E7%A8%8B%E4%BC%98%E5%85%88%E7%BA%A7/</url>
     <content><![CDATA[<p>用户可指定不同线程间的优先级，高优先级的线程在竞争资源时更有利。注意这仅仅是”有利”，即高优先级线程较之低优先级线程有更高的概率获得资源，而非在资源争夺中一定会获胜。Java将线程的优先级分为1-10的十个级别，并且提供了3个内置在Thread类中的静态标量：</p>
@@ -10289,30 +10313,6 @@
         <tag>并发</tag>
         <tag>线程</tag>
         <tag>优先级</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java 并发-碎片</title>
-    <url>/2017/09/29/Java%20%E5%B9%B6%E5%8F%91-%E7%A2%8E%E7%89%87/</url>
-    <content><![CDATA[<h1 id="并发与并行"><a href="#并发与并行" class="headerlink" title="并发与并行"></a>并发与并行</h1><p>并发(Concurrency)是指在一个”时间段”内多任务同时进行。并行(Parallelism)是指在一个”时间点”上多任务同时进行。</p>
-<p>显然我们可以认为并行是并发的子集，因为一个时间段涵盖了无数的时间点。并发如果能做到在其时间段内的每个时间点都是多任务同时进行，那么就会特化为并行；如果做不到，那么在那些做不到的时间点上，任务其实还是串行的，只是通过CPU的调度轮转让各任务都有机会执行，如果这个轮转的时间间隔足够短，就会给观测的人造成”这些任务都是在并行执行”的错觉。</p>
-<p>因为一个CPU(多核架构中指CPU的一个核)一次只能执行一条指令。因此如果只有一个CPU，那么只能实现并发，无论如何也无法实现并行。</p>
-<p>从外部观测者的视角来看，并行和并发的结果是一致的：除非强迫症患者，一般我们是不会纠结于是否真的”同时在进行”。因此通常并不严格区分并发与并行。更常见的情况是，我们往往只会使用并发这个说法。</p>
-<a id="more"></a>
-
-<h1 id="并发的意义"><a href="#并发的意义" class="headerlink" title="并发的意义"></a>并发的意义</h1><ol>
-<li><p>充分利用多处理器的性能。</p>
-</li>
-<li><p>我们所身处的世界本质上就是并发的，因此如果所要模拟实现的系统已经较为复杂，使用并发也是更自然合理的做法。</p>
-</li>
-</ol>
-]]></content>
-      <categories>
-        <category>Java 并发</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>并发</tag>
       </tags>
   </entry>
   <entry>
