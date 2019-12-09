@@ -58,7 +58,7 @@
 <meta property="og:description" content="运行期方法调用的唯一目的就是确定被调用方法的版本(即确定调用哪个类的哪个方法)，执行方法体不是方法调用需考虑的问题。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8&#x2F;0.png">
-<meta property="og:updated_time" content="2018-10-09T08:31:34.000Z">
+<meta property="og:updated_time" content="2019-12-09T06:30:15.121Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;JVM&#x2F;%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8&#x2F;0.png">
 
@@ -245,7 +245,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2018-10-09 16:31:34" itemprop="dateModified" datetime="2018-10-09T16:31:34+08:00">2018-10-09</time>
+                <time title="修改时间：2019-12-09 14:30:15" itemprop="dateModified" datetime="2019-12-09T14:30:15+08:00">2019-12-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -307,7 +307,7 @@
 <p>这个问题对于运行期而言就有点严重了。因为在这个问题被摆到桌面上谈之前方法调用其实也不复杂：编译期其实可以确认方法该调用哪个版本，它所不知道的仅仅只是这个版本的方法在运行期被放到了内存的哪个位置而已。此时运行期需要做的操作仅仅只是把符号引用翻译为直接引用而已。但是当这个问题被抛出后，编译期无法确认方法该调用哪个版本，运行期在具体执行到o.m(P p);所代表的那个字节码指令之前自然也不可能知道。</p>
 <p>这里所说的”不可能知道”其实有些绝对了，更确切的说法应该是”成本太高了，不想知道”。因为运行期的类加载过程其实基本上也是以类为单位加载的：需要一个加载一个。如果想在类加载阶段就确认这件事，那么相当于要将从G0 o = new G1();被声明，到o.m(P p);触发方法调用这期间的所有的”一些代码…”确认一遍，如果涉及到条件分支判断还要将所有分支可能导致的结果都记录下来。这个实现成本基本上就是在逼JVM开发人员自杀。</p>
 <p>无奈之下JVM开发人员只好采取了折中的策略，说来说去可能会导致有问题的情况不也就上文说的那一种吗？那么我们将运行期的方法调用再分为两个阶段：静态多分派及动态单分派。</p>
-<p>在具体介绍这两个阶段之前，需要先介绍一下这两个名字中那些被组合的单词。很显然，这和[Java 并发-同步异步阻塞非阻塞](/2017/10/03/Java 并发-同步异步阻塞非阻塞/)类似：同步异步是一组概念，阻塞非阻塞是一组概念，两组概念组合共能得到4个结果。同理，静态多分派及动态单分派中的静态动态是一组概念，多分派单分派是一组概念，两组概念组合依然能得到4个结果。不过这里，只有其中的两组是有意义的，也就是静态多分派及动态单分派。</p>
+<p>在具体介绍这两个阶段之前，需要先介绍一下这两个名字中那些被组合的单词。很显然，这和<a href="/2017/10/03/Java并发-同步异步阻塞非阻塞/">Java 并发-同步异步阻塞非阻塞</a>类似：同步异步是一组概念，阻塞非阻塞是一组概念，两组概念组合共能得到4个结果。同理，静态多分派及动态单分派中的静态动态是一组概念，多分派单分派是一组概念，两组概念组合依然能得到4个结果。不过这里，只有其中的两组是有意义的，也就是静态多分派及动态单分派。</p>
 <p>所谓静态动态，指的就是能确定方法版本的时期，编译期能确定的就叫做静态，编译期确定不了的就叫做动态。</p>
 <p>所谓单分派与多分派指的就是确定方法版本需要参考的参数(也叫做宗量)个数，如果只参考一个宗量就叫做单分派，需要参考多个宗量就叫做多分派。宗量这个概念并非出自JVM规范，而是源自《Java与模式》一书，不过这本书也足够经典，因此业界也就默认宗量这个概念的权威性了。单看分派，宗量这些概念仿佛很专业很复杂的样子。但其实在方法分配这件事上，宗量其实就只有两个：即”哪个类”的”哪个方法”。</p>
 <p>对于静态多分派及动态单分派的具体含义后文将详述，不过在此我们可以先提纲挈领的总结一下。这两个概念看似让人很懵逼，但说穿了套路其实很简单，在分析之前我们需要再给出两个简单的小概念，即静态类型(Static Type)[也可称为外观类型(Apparent Type)]与实际类型(Actual Type):</p>
@@ -431,7 +431,7 @@
   <div class="popular-posts-header">相关文章</div>
   <ul class="popular-posts">
     <li class="popular-posts-item">
-      <div class="popular-posts-title"><a href="/2017/10/10/Java 基础-重载与重写/" rel="bookmark">Java 基础-重载与重写</a></div>
+      <div class="popular-posts-title"><a href="/2017/10/10/Java基础-重载与重写/" rel="bookmark">Java 基础-重载与重写</a></div>
     </li>
     <li class="popular-posts-item">
       <div class="popular-posts-title"><a href="/2017/10/18/JVM-堆中对象的创建及布局/" rel="bookmark">JVM-堆中对象的创建及布局</a></div>
@@ -626,7 +626,7 @@
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">16:22</span>
+    <span title="站点阅读时长">16:08</span>
 </div>
 
         

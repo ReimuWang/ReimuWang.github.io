@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script src="/js/src/photoswipe.js?v="></script>
+  <script src="/js/src/photoswipe-ui-default.js?v="></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/myLogo32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/myLogo16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://reimuwang.org').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"always","padding":18,"offset":12,"onmobile":true},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="源码">
+<meta name="keywords" content="Java,源码,Collection">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java JDK7源码-java.util.AbstractCollection&lt;E&gt;">
+<meta property="og:url" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;2017&#x2F;06&#x2F;19&#x2F;JavaJDK7%E6%BA%90%E7%A0%81-javautilAbstractCollectionE&#x2F;index.html">
+<meta property="og:site_name" content="ReimuWang&#39;s Blog">
+<meta property="og:description" content="源码">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-09T06:28:58.813Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://reimuwang.org/2017/06/19/JavaJDK7%E6%BA%90%E7%A0%81-javautilAbstractCollectionE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Java JDK7源码-java.util.AbstractCollection&lt;E&gt; | ReimuWang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ReimuWang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">188</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">25</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">113</span></a>
+
+  </li>
+        <li class="menu-item menu-item-photos">
+
+    <a href="/photos/" rel="section"><i class="fa fa-fw fa-photo"></i>Photos</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/ReimuWang" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://reimuwang.org/2017/06/19/JavaJDK7%E6%BA%90%E7%A0%81-javautilAbstractCollectionE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.jpg">
+      <meta itemprop="name" content="王艺凯">
+      <meta itemprop="description" content="Thou Shalt Comment">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ReimuWang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java JDK7源码-java.util.AbstractCollection&lt;E&gt;
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-06-19 15:55:27" itemprop="dateCreated datePublished" datetime="2017-06-19T15:55:27+08:00">2017-06-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-09 14:28:58" itemprop="dateModified" datetime="2019-12-09T14:28:58+08:00">2019-12-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java-JDK7%E6%BA%90%E7%A0%81/" itemprop="url" rel="index">
+                    <span itemprop="name">Java JDK7源码</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>18k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>16 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><a id="more"></a>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">package java.util;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">public abstract class AbstractCollection&lt;E&gt; implements Collection&lt;E&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    protected AbstractCollection() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">     * 查询操作。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">     * 返回一个集合的迭代器，该迭代器默认从头开始迭代。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    public abstract Iterator&lt;E&gt; iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">     * 查询操作。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">     * 返回集合包含的元素个数。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">     * 若集合包含的元素个数大于Integer.MAX_VALUE，则返回Integer.MAX_VALUE。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    public abstract int size();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">     * 查询操作。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">     * 若集合不包含元素则返回true。反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">    public boolean isEmpty() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">        return size() &#x3D;&#x3D; 0;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">36</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">37</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">38</span></pre></td><td class="code"><pre><span class="line">     * 查询操作。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">39</span></pre></td><td class="code"><pre><span class="line">     * 若集合包含o则返回true，反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">40</span></pre></td><td class="code"><pre><span class="line">     * 更具体的说，当且仅当集合包含至少一个元素e，满足(o&#x3D;&#x3D;null ? e&#x3D;&#x3D;null : o.equals(e))时，返回true，反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">41</span></pre></td><td class="code"><pre><span class="line">     * 本方法会用迭代器迭代集合中的每个元素，检查每个元素是否与o相等。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">42</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">43</span></pre></td><td class="code"><pre><span class="line">     * 本方法与后文介绍的containsAll(Collection&lt;?&gt; c)方法很相似，可对比学习。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">44</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">45</span></pre></td><td class="code"><pre><span class="line">     * @throws ClassCastException o的类型与集合不相容。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">46</span></pre></td><td class="code"><pre><span class="line">     * @throws NullPointerException o&#x3D;&#x3D;null且集合不允许空元素存在。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">47</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">48</span></pre></td><td class="code"><pre><span class="line">    public boolean contains(Object o) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">49</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;E&gt; it &#x3D; iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">50</span></pre></td><td class="code"><pre><span class="line">        if (o&#x3D;&#x3D;null) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">51</span></pre></td><td class="code"><pre><span class="line">            while (it.hasNext())</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">52</span></pre></td><td class="code"><pre><span class="line">                if (it.next()&#x3D;&#x3D;null)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">53</span></pre></td><td class="code"><pre><span class="line">                    return true;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">54</span></pre></td><td class="code"><pre><span class="line">        &#125; else &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">55</span></pre></td><td class="code"><pre><span class="line">            while (it.hasNext())</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">56</span></pre></td><td class="code"><pre><span class="line">                if (o.equals(it.next()))</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">57</span></pre></td><td class="code"><pre><span class="line">                    return true;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">58</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">59</span></pre></td><td class="code"><pre><span class="line">        return false;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">60</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">61</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">62</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">63</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">64</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">65</span></pre></td><td class="code"><pre><span class="line">     * 查询操作。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">66</span></pre></td><td class="code"><pre><span class="line">     * 本方法是连接集合与数组之间的桥梁。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">67</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">68</span></pre></td><td class="code"><pre><span class="line">     * 返回一个包含集合所有元素的数组，该数组由集合的迭代器遍历而得，数组中元素的顺序与迭代器遍历而得的顺序相同。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">69</span></pre></td><td class="code"><pre><span class="line">     * 返回的数组的长度等于迭代器遍历而得的元素的个数。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">70</span></pre></td><td class="code"><pre><span class="line">     * 在本方法的开始会调用一次size()得到集合的长度</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">71</span></pre></td><td class="code"><pre><span class="line">     * 通常情况下这与迭代器遍历而得的元素个数相同。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">72</span></pre></td><td class="code"><pre><span class="line">     * 但是集合在迭代过程中发生结构性变化时，最终返回的数组的长度以迭代器实际取出的元素个数为准，这个长度可能会与之前调用的size()方法时得到的结果不同。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">73</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">74</span></pre></td><td class="code"><pre><span class="line">     * 本方法等价于：</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">75</span></pre></td><td class="code"><pre><span class="line">     * List&lt;E&gt; list &#x3D; new ArrayList&lt;E&gt;(size());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">76</span></pre></td><td class="code"><pre><span class="line">     * for (E e : this) list.add(e);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">77</span></pre></td><td class="code"><pre><span class="line">     * return list.toArray();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">78</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">79</span></pre></td><td class="code"><pre><span class="line">     * 返回的数组与集合之间不存在引用关系(即使集合是基于数组的)，数组中的元素是集合中的元素的浅拷贝。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">80</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">81</span></pre></td><td class="code"><pre><span class="line">     * 本方法与后文介绍的toArray(T[] a)方法很相似，可对比学习。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">82</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">83</span></pre></td><td class="code"><pre><span class="line">    public Object[] toArray() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">84</span></pre></td><td class="code"><pre><span class="line">        Object[] r &#x3D; new Object[size()];</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">85</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;E&gt; it &#x3D; iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">86</span></pre></td><td class="code"><pre><span class="line">        for (int i &#x3D; 0; i &lt; r.length; i++) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">87</span></pre></td><td class="code"><pre><span class="line">            if (! it.hasNext())    &#x2F;&#x2F; 迭代器得到的元素少于预期，发生截断</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">88</span></pre></td><td class="code"><pre><span class="line">                &#x2F;&#x2F; 注1：Arrays.copyOf(r, i)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">89</span></pre></td><td class="code"><pre><span class="line">                return Arrays.copyOf(r, i);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">90</span></pre></td><td class="code"><pre><span class="line">            r[i] &#x3D; it.next();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">91</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">92</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 若it.hasNext()&#x3D;&#x3D;true说明迭代器得到的元素多于预期：即集合在迭代过程中长度增加</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">93</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 注2：finishToArray(r, it)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">94</span></pre></td><td class="code"><pre><span class="line">        return it.hasNext() ? finishToArray(r, it) : r;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">95</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">96</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">97</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">98</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">99</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">100</span></pre></td><td class="code"><pre><span class="line">     * 查询操作。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">101</span></pre></td><td class="code"><pre><span class="line">     * 本方法是连接集合与数组之间的桥梁。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">102</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">103</span></pre></td><td class="code"><pre><span class="line">     * 返回包含集合所有元素的数组。返回数组的类型即为a的类型。顺序为迭代器的迭代顺序。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">104</span></pre></td><td class="code"><pre><span class="line">     * 具体规则的伪代码为：</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">105</span></pre></td><td class="code"><pre><span class="line">     * if (a.length &lt; collection.size())</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">106</span></pre></td><td class="code"><pre><span class="line">     *     不修改a，而是以a的类型新建长度为collection.size()的数组并填入集合中的值，随后返回这个新生成的数组。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">107</span></pre></td><td class="code"><pre><span class="line">     * else if (a.length &#x3D;&#x3D; collection.size()</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">108</span></pre></td><td class="code"><pre><span class="line">     *     将返回的结果直接填入a后返回a(若a中已有值，则a中的原值会被覆盖)。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">109</span></pre></td><td class="code"><pre><span class="line">     * else</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">110</span></pre></td><td class="code"><pre><span class="line">     *     数组索引在[0, collection.size() -1]的元素会被集合对应位置的元素覆盖。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">111</span></pre></td><td class="code"><pre><span class="line">     *     数组索引 &#x3D;&#x3D; collection.size()的元素会被置为null</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">112</span></pre></td><td class="code"><pre><span class="line">     *     数组中后续元素(如果有的话)不变。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">113</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">114</span></pre></td><td class="code"><pre><span class="line">     * 若集合不允许包含空元素，则本方法此时可用来计算集合的长度：返回的数组第一次出现null的索引即为集合的长度。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">115</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">116</span></pre></td><td class="code"><pre><span class="line">     * 返回的数组与集合之间不存在引用关系(即使集合的底层就是基于数组实现的)，数组中的元素是集合中元素的浅拷贝。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">117</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">118</span></pre></td><td class="code"><pre><span class="line">     * 小例子：</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">119</span></pre></td><td class="code"><pre><span class="line">     * String[] y &#x3D; x.toArray(new String[0]);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">120</span></pre></td><td class="code"><pre><span class="line">     * x是一个元素类型为String的集合，则上述语句会将x中的元素依序复制一份浅拷贝到数组y。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">121</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">122</span></pre></td><td class="code"><pre><span class="line">     * 关于本方法与前文介绍的toArray()方法，需明确：</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">123</span></pre></td><td class="code"><pre><span class="line">     * collection.toArray()</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">124</span></pre></td><td class="code"><pre><span class="line">     * collection.toArray(new Object[s])</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">125</span></pre></td><td class="code"><pre><span class="line">     * 当s &lt; collection.size()时，上述两行代码的效果等价。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">126</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">127</span></pre></td><td class="code"><pre><span class="line">     * 返回数组的有效长度(数组中属于集合中的元素的长度)等于迭代器遍历而得的元素的个数。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">128</span></pre></td><td class="code"><pre><span class="line">     * 本方法开始时会调用一次size()得到集合的长度，通常情况下这与迭代器遍历而得的元素个数相同。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">129</span></pre></td><td class="code"><pre><span class="line">     * 但当集合在迭代过程中发生结构性变化时，最终返回的数组的有效长度以迭代器实际取出的元素个数为准。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">130</span></pre></td><td class="code"><pre><span class="line">     * 这个长度可能会与之前调用size()时得到的结果不同。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">131</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">132</span></pre></td><td class="code"><pre><span class="line">     * 注4：toArray(T[] a)的调用示例</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">133</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">134</span></pre></td><td class="code"><pre><span class="line">     * 本方法与前文介绍的toArray()方法很相似，可对比学习。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">135</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">136</span></pre></td><td class="code"><pre><span class="line">     * @throws ArrayStoreException a的类型collection不支持。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">137</span></pre></td><td class="code"><pre><span class="line">     * @throws NullPointerException null&#x3D;&#x3D;a。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">138</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">139</span></pre></td><td class="code"><pre><span class="line">    public &lt;T&gt; T[] toArray(T[] a) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">140</span></pre></td><td class="code"><pre><span class="line">        int size &#x3D; size();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">141</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 以a中元素的类型为基础，根据反射新声明一个长度为size的数组</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">142</span></pre></td><td class="code"><pre><span class="line">        T[] r &#x3D; a.length &gt;&#x3D; size ? a :</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">143</span></pre></td><td class="code"><pre><span class="line">                  (T[])java.lang.reflect.Array</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">144</span></pre></td><td class="code"><pre><span class="line">                  .newInstance(a.getClass().getComponentType(), size);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">145</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;E&gt; it &#x3D; iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">146</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">147</span></pre></td><td class="code"><pre><span class="line">        for (int i &#x3D; 0; i &lt; r.length; i++) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">148</span></pre></td><td class="code"><pre><span class="line">            if (! it.hasNext()) &#123;    &#x2F;&#x2F; 迭代器得到元素少于预期，可能原因有2:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">149</span></pre></td><td class="code"><pre><span class="line">                                     &#x2F;&#x2F; 1.迭代过程中集合的元素减少。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">150</span></pre></td><td class="code"><pre><span class="line">                                     &#x2F;&#x2F; 2.a.length&gt;size</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">151</span></pre></td><td class="code"><pre><span class="line">                if (a &#x3D;&#x3D; r) &#123;    &#x2F;&#x2F; a.length&gt;&#x3D;size，此时操作r与操作a等效。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">152</span></pre></td><td class="code"><pre><span class="line">                    r[i] &#x3D; null;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">153</span></pre></td><td class="code"><pre><span class="line">                 &#x2F;&#x2F; 后续else都是在处理a.length&lt;size的情况。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">154</span></pre></td><td class="code"><pre><span class="line">                 &#x2F;&#x2F; 此时r与a是两个完全不同的数组。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">155</span></pre></td><td class="code"><pre><span class="line">                &#125; else if (a.length &lt; i) &#123;    &#x2F;&#x2F; 此时少于预期的原因无论是1或2，集合依然无法放入a中。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">156</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; 注1：Arrays.copyOf(r, i)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">157</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; 截取r并返回截取后的数组</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">158</span></pre></td><td class="code"><pre><span class="line">                    return Arrays.copyOf(r, i);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">159</span></pre></td><td class="code"><pre><span class="line">                &#125; else &#123;    &#x2F;&#x2F; 此时虽然最初有a.length&lt;size，但是因为原因1，a又能装下集合了。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">160</span></pre></td><td class="code"><pre><span class="line">                            &#x2F;&#x2F; 因此仍然选择将集合存入a。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">161</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; 注3：System.arraycopy(r, 0, a, 0, i)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">162</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; 调用此方法时有：r.length&#x3D;size&gt;a.length&gt;&#x3D;i</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">163</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; 因此前有值时操作的均为r，故将r中的数据复制索引[0,i-1]至a。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">164</span></pre></td><td class="code"><pre><span class="line">                    System.arraycopy(r, 0, a, 0, i);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">165</span></pre></td><td class="code"><pre><span class="line">                    if (a.length &gt; i) &#123;    &#x2F;&#x2F; a.length&#x3D;&#x3D;i的情况不需要置null。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">166</span></pre></td><td class="code"><pre><span class="line">                        a[i] &#x3D; null;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">167</span></pre></td><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">168</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">169</span></pre></td><td class="code"><pre><span class="line">                return a;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">170</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">171</span></pre></td><td class="code"><pre><span class="line">            r[i] &#x3D; (T)it.next();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">172</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">173</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 迭代器得到元素多于预期。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">174</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 可能的原因为：迭代过程中集合的元素增加。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">175</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 注2：finishToArray(r, it)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">176</span></pre></td><td class="code"><pre><span class="line">        return it.hasNext() ? finishToArray(r, it) : r;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">177</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">178</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">179</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">180</span></pre></td><td class="code"><pre><span class="line">     * 通常情况下，允许创建的最大数组长度</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">181</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">182</span></pre></td><td class="code"><pre><span class="line">     * 某些JVM会在数组中存储同步关键词</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">183</span></pre></td><td class="code"><pre><span class="line">     * 因此在声明容量较大的数组时应注意避免OutOfMemoryError</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">184</span></pre></td><td class="code"><pre><span class="line">     * -8是一个相对安全的经验之谈，具体是否出错还要看实际的JVM实现</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">185</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">186</span></pre></td><td class="code"><pre><span class="line">    private static final int MAX_ARRAY_SIZE &#x3D; Integer.MAX_VALUE - 8;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">187</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">188</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">189</span></pre></td><td class="code"><pre><span class="line">     * 在调用toArray(T[] a)或toArray()时</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">190</span></pre></td><td class="code"><pre><span class="line">     * 若迭代器返回的元素个数多于预期，则会调用本方法返回新数组，对原数组进行扩容</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">191</span></pre></td><td class="code"><pre><span class="line">     * 并将迭代器中多于预期的元素填入新数组</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">192</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">193</span></pre></td><td class="code"><pre><span class="line">    private static &lt;T&gt; T[] finishToArray(T[] r, Iterator&lt;?&gt; it) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">194</span></pre></td><td class="code"><pre><span class="line">        int i &#x3D; r.length;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">195</span></pre></td><td class="code"><pre><span class="line">        while (it.hasNext()) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">196</span></pre></td><td class="code"><pre><span class="line">            int cap &#x3D; r.length;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">197</span></pre></td><td class="code"><pre><span class="line">            if (i &#x3D;&#x3D; cap) &#123;    &#x2F;&#x2F; 本if中是一次扩容操作：</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">198</span></pre></td><td class="code"><pre><span class="line">                               &#x2F;&#x2F; 当前待插入索引i&#x3D;&#x3D;r.length时需扩容。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">199</span></pre></td><td class="code"><pre><span class="line">                &#x2F;&#x2F; 若本句越界，则不会进入后面的if条件，会在调用Arrays.copyOf(r, newCap);时抛出异常。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">200</span></pre></td><td class="code"><pre><span class="line">                int newCap &#x3D; cap + (cap &gt;&gt; 1) + 1;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">201</span></pre></td><td class="code"><pre><span class="line">                &#x2F;&#x2F; 满足进入本if的条件很苛刻：</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">202</span></pre></td><td class="code"><pre><span class="line">                &#x2F;&#x2F; newCap &gt; MAX_ARRAY_SIZE &amp;&amp; newCap &lt; Integer.MAX_VALUE。只有7个值。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">203</span></pre></td><td class="code"><pre><span class="line">                &#x2F;&#x2F; 进入本if说明当前的newCap OutOfMemoryError的风险较高。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">204</span></pre></td><td class="code"><pre><span class="line">                if (newCap - MAX_ARRAY_SIZE &gt; 0)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">205</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; 使用cap重新计算一个相对安全的newCap</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">206</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; hugeCapacity(cap + 1):见紧随本方法之后的下一个方法</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">207</span></pre></td><td class="code"><pre><span class="line">                    &#x2F;&#x2F; cap + 1为此时能允许的最小长度，因为cap已经不够用了</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">208</span></pre></td><td class="code"><pre><span class="line">                    newCap &#x3D; hugeCapacity(cap + 1);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">209</span></pre></td><td class="code"><pre><span class="line">                &#x2F;&#x2F; 执行扩容操作。扩容后r已指向了一个全新的数组</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">210</span></pre></td><td class="code"><pre><span class="line">                r &#x3D; Arrays.copyOf(r, newCap);    &#x2F;&#x2F; 注1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">211</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">212</span></pre></td><td class="code"><pre><span class="line">            r[i++] &#x3D; (T)it.next();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">213</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">214</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 若扩容后的数组过大则将多余位置截断</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">215</span></pre></td><td class="code"><pre><span class="line">        return (i &#x3D;&#x3D; r.length) ? r : Arrays.copyOf(r, i);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">216</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">217</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">218</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">219</span></pre></td><td class="code"><pre><span class="line">     * 当数组规模极大时才需要调用本方法。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">220</span></pre></td><td class="code"><pre><span class="line">     * minCapacity为调用方能接受的最小扩容后的数组长度。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">221</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">222</span></pre></td><td class="code"><pre><span class="line">     * 本方法判断minCapacity的值系统是否可接受</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">223</span></pre></td><td class="code"><pre><span class="line">     * 若能接受则基于minCapacity返回一个合理的扩容后的长度，若不能接受则抛出OutOfMemoryError。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">224</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">225</span></pre></td><td class="code"><pre><span class="line">    private static int hugeCapacity(int minCapacity) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">226</span></pre></td><td class="code"><pre><span class="line">        if (minCapacity &lt; 0)    &#x2F;&#x2F; minCapacity本来为一个极大的数，此处minCapacity&lt;0说明其已越界。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">227</span></pre></td><td class="code"><pre><span class="line">            throw new OutOfMemoryError</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">228</span></pre></td><td class="code"><pre><span class="line">                (&quot;Required array size too large&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">229</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 如果可能尽量将大小的上限控制为MAX_ARRAY_SIZE。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">230</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 如果调用方能接受的容量范围在(MAX_ARRAY_SIZE,Integer.MAX_VALUE]，</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">231</span></pre></td><td class="code"><pre><span class="line">        &#x2F;&#x2F; 此时虽然OutOfMemoryError的风险较大，但系统仍会返回Integer.MAX_VALUE。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">232</span></pre></td><td class="code"><pre><span class="line">        return (minCapacity &gt; MAX_ARRAY_SIZE) ?</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">233</span></pre></td><td class="code"><pre><span class="line">            Integer.MAX_VALUE :</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">234</span></pre></td><td class="code"><pre><span class="line">            MAX_ARRAY_SIZE;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">235</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">236</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">237</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">238</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">239</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">240</span></pre></td><td class="code"><pre><span class="line">     * 修改操作</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">241</span></pre></td><td class="code"><pre><span class="line">     * 本方法始终抛出UnsupportedOperationException</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">242</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">243</span></pre></td><td class="code"><pre><span class="line">     * @throws UnsupportedOperationException 集合不支持本方法。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">244</span></pre></td><td class="code"><pre><span class="line">     * @throws ClassCastException e因其类型禁止被插入集合。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">245</span></pre></td><td class="code"><pre><span class="line">     * @throws NullPointerException e&#x3D;&#x3D;null且集合禁止包含null。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">246</span></pre></td><td class="code"><pre><span class="line">     * @throws IllegalArgumentException e因其某些属性禁止被插入集合。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">247</span></pre></td><td class="code"><pre><span class="line">     * @throws IllegalStateException 因插入限制，此时e不能被插入集合。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">248</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">249</span></pre></td><td class="code"><pre><span class="line">    public boolean add(E e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">250</span></pre></td><td class="code"><pre><span class="line">        throw new UnsupportedOperationException();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">251</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">252</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">253</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">254</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">255</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">256</span></pre></td><td class="code"><pre><span class="line">     * 修改操作。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">257</span></pre></td><td class="code"><pre><span class="line">     * 若本方法改变了集合则返回true，反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">258</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">259</span></pre></td><td class="code"><pre><span class="line">     * 使用集合的迭代器遍历集合</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">260</span></pre></td><td class="code"><pre><span class="line">     * 并用iterator.remove()移除集合符合条件的元素e：</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">261</span></pre></td><td class="code"><pre><span class="line">     * (o&#x3D;&#x3D;null ? e&#x3D;&#x3D;null : o.equals(e))。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">262</span></pre></td><td class="code"><pre><span class="line">     * 若有多个e符合条件，则本方法只会移除iterator遍历得到的第一个。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">263</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">264</span></pre></td><td class="code"><pre><span class="line">     * 若集合包含o且其迭代器未实现remove()，则抛出UnsupportedOperationException。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">265</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">266</span></pre></td><td class="code"><pre><span class="line">     * 本方法与后文介绍的removeAll(Collection&lt;?&gt; c)方法很相似，可对比学习。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">267</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">268</span></pre></td><td class="code"><pre><span class="line">     * @throws UnsupportedOperationException 集合不支持本方法。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">269</span></pre></td><td class="code"><pre><span class="line">     * @throws ClassCastException o的类型与集合不相容。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">270</span></pre></td><td class="code"><pre><span class="line">     * @throws NullPointerException o&#x3D;&#x3D;null且集合不允许空元素存在。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">271</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">272</span></pre></td><td class="code"><pre><span class="line">    public boolean remove(Object o) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">273</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;E&gt; it &#x3D; iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">274</span></pre></td><td class="code"><pre><span class="line">        if (o&#x3D;&#x3D;null) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">275</span></pre></td><td class="code"><pre><span class="line">            while (it.hasNext()) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">276</span></pre></td><td class="code"><pre><span class="line">                if (it.next()&#x3D;&#x3D;null) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">277</span></pre></td><td class="code"><pre><span class="line">                    it.remove();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">278</span></pre></td><td class="code"><pre><span class="line">                    return true;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">279</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">280</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">281</span></pre></td><td class="code"><pre><span class="line">        &#125; else &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">282</span></pre></td><td class="code"><pre><span class="line">            while (it.hasNext()) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">283</span></pre></td><td class="code"><pre><span class="line">                if (o.equals(it.next())) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">284</span></pre></td><td class="code"><pre><span class="line">                    it.remove();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">285</span></pre></td><td class="code"><pre><span class="line">                    return true;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">286</span></pre></td><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">287</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">288</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">289</span></pre></td><td class="code"><pre><span class="line">        return false;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">290</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">291</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">292</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">293</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">294</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">295</span></pre></td><td class="code"><pre><span class="line">     * 批量查询操作。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">296</span></pre></td><td class="code"><pre><span class="line">     * 若集合包含c中所有元素则返回true，反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">297</span></pre></td><td class="code"><pre><span class="line">     *</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">298</span></pre></td><td class="code"><pre><span class="line">     * 本方法与前文介绍的contains(Object o)方法很相似，可对比学习。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">299</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">300</span></pre></td><td class="code"><pre><span class="line">     * @throws ClassCastException c中至少有一个元素的类型与集合不相容。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">301</span></pre></td><td class="code"><pre><span class="line">     * @throws NullPointerException c&#x3D;&#x3D;null或</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">302</span></pre></td><td class="code"><pre><span class="line">     *                              c中至少有一个元素为null且集合不允许空元素存在。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">303</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">304</span></pre></td><td class="code"><pre><span class="line">    public boolean containsAll(Collection&lt;?&gt; c) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">305</span></pre></td><td class="code"><pre><span class="line">        for (Object e : c)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">306</span></pre></td><td class="code"><pre><span class="line">            if (!contains(e))</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">307</span></pre></td><td class="code"><pre><span class="line">                return false;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">308</span></pre></td><td class="code"><pre><span class="line">        return true;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">309</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">310</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">311</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">312</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">313</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">314</span></pre></td><td class="code"><pre><span class="line">     * 批量修改操作</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">315</span></pre></td><td class="code"><pre><span class="line">     * 将c中所有元素插入集合。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">316</span></pre></td><td class="code"><pre><span class="line">     * 若集合因本方法发生变化则返回true，反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">317</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">318</span></pre></td><td class="code"><pre><span class="line">     * 本方法未定义如下事件发生时的解决策略：在将c中的元素添加至集合的过程中c发生变化。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">319</span></pre></td><td class="code"><pre><span class="line">     * 这也意味着如下事件的解决策略同样未定义：将一个非空集合添加至自身。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">320</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">321</span></pre></td><td class="code"><pre><span class="line">     * 在c!&#x3D;null的前提下，若未重写add(E e)，则本方法将抛出UnsupportedOperationException。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">322</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">323</span></pre></td><td class="code"><pre><span class="line">     * 本方法与前文介绍的add(E e)方法很相似，可对比学习。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">324</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">325</span></pre></td><td class="code"><pre><span class="line">     * @throws UnsupportedOperationException 集合不支持本方法。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">326</span></pre></td><td class="code"><pre><span class="line">     * @throws ClassCastException c中任意一个元素因其类型禁止被插入集合。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">327</span></pre></td><td class="code"><pre><span class="line">     * @throws NullPointerException c&#x3D;&#x3D;null或</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">328</span></pre></td><td class="code"><pre><span class="line">     *                              c中至少有一个元素为null且集合不允许空元素存在。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">329</span></pre></td><td class="code"><pre><span class="line">     * @throws IllegalArgumentException c中任意一个元素因其某些属性禁止被插入集合。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">330</span></pre></td><td class="code"><pre><span class="line">     * @throws IllegalStateException 因插入限制，此时并非c中所有元素都能被插入集合。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">331</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">332</span></pre></td><td class="code"><pre><span class="line">    public boolean addAll(Collection&lt;? extends E&gt; c) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">333</span></pre></td><td class="code"><pre><span class="line">        boolean modified &#x3D; false;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">334</span></pre></td><td class="code"><pre><span class="line">        for (E e : c)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">335</span></pre></td><td class="code"><pre><span class="line">            if (add(e))</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">336</span></pre></td><td class="code"><pre><span class="line">                modified &#x3D; true;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">337</span></pre></td><td class="code"><pre><span class="line">        return modified;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">338</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">339</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">340</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">341</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">342</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">343</span></pre></td><td class="code"><pre><span class="line">     * 批量修改操作</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">344</span></pre></td><td class="code"><pre><span class="line">     * 从集合中移除所有与c的交集元素(求差集)。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">345</span></pre></td><td class="code"><pre><span class="line">     * 若集合因本方法发生变化则返回true，反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">346</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">347</span></pre></td><td class="code"><pre><span class="line">     * 若迭代器未实现remove()且集合至少有一个元素在c中则抛出UnsupportedOperationException。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">348</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">349</span></pre></td><td class="code"><pre><span class="line">     * 本方法与前文介绍的remove(Object o)方法很相似，可对比学习。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">350</span></pre></td><td class="code"><pre><span class="line">     * 本方法与后文介绍的retainAll(Collection&lt;?&gt; c)方法正相反，可对比学习。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">351</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">352</span></pre></td><td class="code"><pre><span class="line">     * @throws UnsupportedOperationException 集合不支持本方法。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">353</span></pre></td><td class="code"><pre><span class="line">     * @throws ClassCastException c中至少有一个元素的类型与集合不相容。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">354</span></pre></td><td class="code"><pre><span class="line">     * @throws NullPointerException c&#x3D;&#x3D;null或</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">355</span></pre></td><td class="code"><pre><span class="line">     *                              集合中至少有一个元素为null且c不允许空元素存在。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">356</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">357</span></pre></td><td class="code"><pre><span class="line">    public boolean removeAll(Collection&lt;?&gt; c) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">358</span></pre></td><td class="code"><pre><span class="line">        boolean modified &#x3D; false;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">359</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;?&gt; it &#x3D; iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">360</span></pre></td><td class="code"><pre><span class="line">        while (it.hasNext()) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">361</span></pre></td><td class="code"><pre><span class="line">            if (c.contains(it.next())) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">362</span></pre></td><td class="code"><pre><span class="line">                it.remove();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">363</span></pre></td><td class="code"><pre><span class="line">                modified &#x3D; true;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">364</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">365</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">366</span></pre></td><td class="code"><pre><span class="line">        return modified;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">367</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">368</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">369</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">370</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">371</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">372</span></pre></td><td class="code"><pre><span class="line">     * 批量修改操作</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">373</span></pre></td><td class="code"><pre><span class="line">     * 保留集合中与c的交集元素。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">374</span></pre></td><td class="code"><pre><span class="line">     * 若集合因本方法发生变化则返回true，反之返回false。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">375</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">376</span></pre></td><td class="code"><pre><span class="line">     * 若迭代器未实现remove()且集合至少有一个元素不在c中则抛出UnsupportedOperationException。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">377</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">378</span></pre></td><td class="code"><pre><span class="line">     * 本方法与前文介绍的removeAll(Collection&lt;?&gt; c)方法正相反，可对比学习。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">379</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">380</span></pre></td><td class="code"><pre><span class="line">     * @throws UnsupportedOperationException 集合不支持本方法。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">381</span></pre></td><td class="code"><pre><span class="line">     * @throws ClassCastException c中至少有一个元素的类型与集合不相容。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">382</span></pre></td><td class="code"><pre><span class="line">     * @throws NullPointerException c&#x3D;&#x3D;null或</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">383</span></pre></td><td class="code"><pre><span class="line">     *                              集合中至少有一个元素为null且c不允许空元素存在。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">384</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">385</span></pre></td><td class="code"><pre><span class="line">    public boolean retainAll(Collection&lt;?&gt; c) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">386</span></pre></td><td class="code"><pre><span class="line">        boolean modified &#x3D; false;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">387</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;E&gt; it &#x3D; iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">388</span></pre></td><td class="code"><pre><span class="line">        while (it.hasNext()) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">389</span></pre></td><td class="code"><pre><span class="line">            if (!c.contains(it.next())) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">390</span></pre></td><td class="code"><pre><span class="line">                it.remove();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">391</span></pre></td><td class="code"><pre><span class="line">                modified &#x3D; true;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">392</span></pre></td><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">393</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">394</span></pre></td><td class="code"><pre><span class="line">        return modified;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">395</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">396</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">397</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">398</span></pre></td><td class="code"><pre><span class="line">     * 实现接口:java.util.Collection&lt;E&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">399</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">400</span></pre></td><td class="code"><pre><span class="line">     * 批量修改操作</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">401</span></pre></td><td class="code"><pre><span class="line">     * 清空集合。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">402</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">403</span></pre></td><td class="code"><pre><span class="line">     * 若迭代器未实现remove()且集合非空则抛出UnsupportedOperationException。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">404</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">405</span></pre></td><td class="code"><pre><span class="line">     * @throws UnsupportedOperationException 集合不支持本方法。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">406</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">407</span></pre></td><td class="code"><pre><span class="line">    public void clear() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">408</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;E&gt; it &#x3D; iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">409</span></pre></td><td class="code"><pre><span class="line">        while (it.hasNext()) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">410</span></pre></td><td class="code"><pre><span class="line">            it.next();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">411</span></pre></td><td class="code"><pre><span class="line">            it.remove();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">412</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">413</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">414</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">415</span></pre></td><td class="code"><pre><span class="line">    &#x2F;**</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">416</span></pre></td><td class="code"><pre><span class="line">     * 字符串变换</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">417</span></pre></td><td class="code"><pre><span class="line">     * 返回集合的字符串表述：</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">418</span></pre></td><td class="code"><pre><span class="line">     * [e1, e2, e3]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">419</span></pre></td><td class="code"><pre><span class="line">     * 其中e1,e2,e3为集合按其迭代器顺序排列的元素。</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">420</span></pre></td><td class="code"><pre><span class="line">     * </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">421</span></pre></td><td class="code"><pre><span class="line">     * 注5 toString()调用示例</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">422</span></pre></td><td class="code"><pre><span class="line">     *&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">423</span></pre></td><td class="code"><pre><span class="line">    public String toString() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">424</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;E&gt; it &#x3D; iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">425</span></pre></td><td class="code"><pre><span class="line">        if (! it.hasNext())</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">426</span></pre></td><td class="code"><pre><span class="line">            return &quot;[]&quot;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">427</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">428</span></pre></td><td class="code"><pre><span class="line">        StringBuilder sb &#x3D; new StringBuilder();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">429</span></pre></td><td class="code"><pre><span class="line">        sb.append(&#39;[&#39;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">430</span></pre></td><td class="code"><pre><span class="line">        for (;;) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">431</span></pre></td><td class="code"><pre><span class="line">            E e &#x3D; it.next();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">432</span></pre></td><td class="code"><pre><span class="line">            &#x2F;&#x2F; 防止自包含时无限递归</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">433</span></pre></td><td class="code"><pre><span class="line">            sb.append(e &#x3D;&#x3D; this ? &quot;(this Collection)&quot; : e);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">434</span></pre></td><td class="code"><pre><span class="line">            if (! it.hasNext())</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">435</span></pre></td><td class="code"><pre><span class="line">                return sb.append(&#39;]&#39;).toString();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">436</span></pre></td><td class="code"><pre><span class="line">            sb.append(&#39;,&#39;).append(&#39; &#39;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">437</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">438</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">439</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">440</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h1 id="已整理层级关系"><a href="#已整理层级关系" class="headerlink" title="已整理层级关系"></a>已整理层级关系</h1><p><strong><em>本类直接实现的接口</em></strong></p>
+<ul>
+<li><a href="/2017/05/23/JavaJDK7源码-javautilCollectionE/">java.util.Collection&lt;E&gt;</a></li>
+</ul>
+<p><strong><em>直接继承本类的类</em></strong></p>
+<ul>
+<li><a href="/2017/06/19/JavaJDK7源码-javautilAbstractListE/">java.util.AbstractList&lt;E&gt;</a></li>
+<li><a href="/2017/06/28/JavaJDK7源码-javautilAbstractSetE/">java.util.AbstractSet&lt;E&gt;</a></li>
+<li><a href="/2017/06/30/JavaJDK7源码-javautilAbstractQueueE/">java.util.AbstractQueue&lt;E&gt;</a></li>
+</ul>
+<h1 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h1><p>本类是Java集合框架中的一员，提供了Collection接口的基本实现。</p>
+<p>如果要实现一个不需要改变的集合，程序员仅仅需要继承本类然后提供iterator()(iterator()返回的iterator必须实现hasNext()及next())及size()的实现。</p>
+<p>例如，某个不可变的实现如下(为了填入数据，至少还需要初始化数据的代码，我将其放到了构造函数中)：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.AbstractCollection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">import java.util.Collection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">import java.util.HashMap;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">import java.util.Iterator;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">import java.util.Map;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">public class UnmoCol&lt;E&gt; extends AbstractCollection&lt;E&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    private Map&lt;E, Object&gt; map &#x3D; new HashMap&lt;E, Object&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    public UnmoCol(Collection&lt;E&gt; c) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;E&gt; cIterator &#x3D; c.iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">        while (cIterator.hasNext()) this.map.put(cIterator.next(), new Object());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    public Iterator&lt;E&gt; iterator() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        return this.map.keySet().iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">    public int size() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">        return this.map.size();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>调用demo如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.Collection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">import java.util.HashSet;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">import java.util.Iterator;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">import java.util.Set;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">public class Main &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        Set&lt;String&gt; set &#x3D; new HashSet&lt;String&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        set.add(&quot;reimu&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">        set.add(&quot;wang&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        Collection&lt;String&gt; collection &#x3D; new UnmoCol&lt;String&gt;(set);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">        System.out.println(collection.size());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;String&gt; iterator &#x3D; collection.iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        while (iterator.hasNext()) System.out.println(iterator.next());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>执行后输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">reimu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">wang</span></pre></td></tr></table></figure>
+
+<p>如果要实现一个可变的集合，程序员必须重写本类的add(E e)方法(否则会抛出UnsupportedOperationException)。然后iterator()返回的iterator必须实现hasNext(),next(),remove()。</p>
+<p>例如，某个实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.AbstractCollection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">import java.util.HashMap;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">import java.util.Iterator;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">import java.util.Map;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">public class Mocol&lt;E&gt; extends AbstractCollection&lt;E&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    private Map&lt;E, Object&gt; map &#x3D; new HashMap&lt;E, Object&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    public Iterator&lt;E&gt; iterator() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        return this.map.keySet().iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">    @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    public int size() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">        return this.map.size();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    public boolean add(E e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">        return this.map.put(e, new Object()) &#x3D;&#x3D; null;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>调用demo如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.Collection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">import java.util.Iterator;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">public class Main &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        Collection&lt;String&gt; collection &#x3D; new Mocol&lt;String&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        collection.add(&quot;reimu&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        collection.add(&quot;wang&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        System.out.println(collection.size());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;String&gt; iterator &#x3D; collection.iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        while (iterator.hasNext()) System.out.println(iterator.next());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>执行本demo输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">reimu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">wang</span></pre></td></tr></table></figure>
+
+<p>Java语言规范建议程序员在继承本类时实现两个构造函数：void(无参)构造函数。接收一个collection的构造函数。</p>
+<p>综上所述，现写本类的测试继承类如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.AbstractCollection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">import java.util.Collection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">import java.util.HashMap;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">import java.util.Iterator;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">public class AbstractCollectionTest&lt;E&gt; extends AbstractCollection&lt;E&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    private HashMap&lt;E, Object&gt; map &#x3D; new HashMap&lt;E, Object&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    public AbstractCollectionTest() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    public AbstractCollectionTest(Collection&lt;E&gt; c) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">        Iterator&lt;E&gt; cIterator &#x3D; c.iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        while (cIterator.hasNext()) this.map.put(cIterator.next(), new Object());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    public Iterator&lt;E&gt; iterator() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">        return this.map.keySet().iterator();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">    public int size() &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">        return this.map.size();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">    @Override</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">    public boolean add(E e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">        return map.put(e, new Object()) &#x3D;&#x3D; null;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h1 id="注1：Arrays-copyOf-r-i"><a href="#注1：Arrays-copyOf-r-i" class="headerlink" title="注1：Arrays.copyOf(r, i)"></a>注1：Arrays.copyOf(r, i)</h1><p>以r为基础返回一个长度为i的数组。</p>
+<ul>
+<li>若i&lt;r.length则r发生截断。实际返回的数组为r中索引为[0,i-1]的元素。</li>
+<li>若i==r.length，则返回的数组与r相等。</li>
+<li>若i&gt;r.length，返回的数组中索引为[0, r.length-1]的元素为r中对应位置的元素，索引为[r.length, i-1]的元素以null填充。</li>
+</ul>
+<p>无论如何，返回的数组都是新生成的，与r不存在引用关系。返回的数组中的元素是r中元素的浅拷贝。</p>
+<h1 id="注2：finishToArray-r-it"><a href="#注2：finishToArray-r-it" class="headerlink" title="注2：finishToArray(r, it)"></a>注2：finishToArray(r, it)</h1><p>finishToArray(r, it)会以r为基础声明一个长度足够的新数组r2，并将it中超出预期仍未取完的元素添加至r2，而后返回r2。</p>
+<h1 id="注3：System-arraycopy-r-0-a-0-i"><a href="#注3：System-arraycopy-r-0-a-0-i" class="headerlink" title="注3：System.arraycopy(r, 0, a, 0, i)"></a>注3：System.arraycopy(r, 0, a, 0, i)</h1><p>参数含义依次为：</p>
+<ol>
+<li>r: 待复制的源数组。</li>
+<li>0: 源数组中开始复制的索引。</li>
+<li>a: 复制目标数组。</li>
+<li>0: 目标数组中接收元素的起始索引。</li>
+<li>i: 复制的元素个数。</li>
+</ol>
+<h1 id="注4：toArray-T-a-的调用示例"><a href="#注4：toArray-T-a-的调用示例" class="headerlink" title="注4：toArray(T[] a)的调用示例"></a>注4：toArray(T[] a)的调用示例</h1><p>示例1：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.Collection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">import java.util.HashSet;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">import java.util.Set;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">public class Main &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        Set&lt;String&gt; set &#x3D; new HashSet&lt;String&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        set.add(&quot;reimu&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        set.add(&quot;wang&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">        Collection&lt;String&gt; collection &#x3D; new UnmoCol&lt;String&gt;(set);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        String[] a &#x3D; &#123;&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;&#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">        String[] a1 &#x3D; collection.toArray(a);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">        for (String e : a1) System.out.println(e);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">reimu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">wang</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">null</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">4</span></pre></td></tr></table></figure>
+
+<hr>
+<p>示例2</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">package com.collectiontest.main;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">import java.util.Collection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">import java.util.HashSet;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">import java.util.Set;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">public class Main &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        Set&lt;String&gt; set &#x3D; new HashSet&lt;String&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">        set.add(&quot;reimu&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        set.add(&quot;wang&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">        Collection&lt;String&gt; collection &#x3D; new UnmoCol&lt;String&gt;(set);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">        String[] a &#x3D; &#123;&#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        String[] a1 &#x3D; collection.toArray(a);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">        for (String e : a1) System.out.println(e);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">reimu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">wang</span></pre></td></tr></table></figure>
+
+<h1 id="注5-toString-调用示例"><a href="#注5-toString-调用示例" class="headerlink" title="注5 toString()调用示例"></a>注5 toString()调用示例</h1><p><strong>自包含测试</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.Collection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">public class Main &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">        Collection&lt;Collection&gt; collection &#x3D; new AbstractCollectionTest&lt;Collection&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        collection.add(collection);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        System.out.println(collection);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[(this Collection)]</span></pre></td></tr></table></figure>
+
+<p><strong>非自包含情况测试</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">import java.util.Collection;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">import java.util.HashSet;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">import java.util.Set;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">public class Main &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        Set&lt;String&gt; set &#x3D; new HashSet&lt;String&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        set.add(&quot;reimu&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        set.add(&quot;wang&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">        Collection&lt;String&gt; collection &#x3D; new AbstractCollectionTest&lt;String&gt;(set);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        System.out.println(collection);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[reimu, wang]</span></pre></td></tr></table></figure>
+
+<h1 id="未整理层级关系"><a href="#未整理层级关系" class="headerlink" title="未整理层级关系"></a>未整理层级关系</h1><p><strong><em>本类直接继承的类</em></strong></p>
+<ul>
+<li><a href="">java.lang.Object</a></li>
+</ul>
+<p><strong><em>直接继承本类的类</em></strong></p>
+<ul>
+<li><a href="">java.util.ArrayDeque&lt;E&gt;</a></li>
+<li><a href="">java.util.concurrent.ConcurrentLinkedDeque&lt;E&gt;</a></li>
+</ul>
+<p><strong><em>直接继承本类的内部类</em></strong></p>
+<ul>
+<li><a href="">静态成员内部类java.lang.ProcessEnvironment.CheckedValues</a></li>
+<li><a href="">实例成员内部类java.util.HashMap&lt;K,V&gt;.Values</a></li>
+<li><a href="">实例成员内部类java.util.IdentityHashMap&lt;K,V&gt;.Values</a></li>
+<li><a href="">实例成员内部类java.util.WeakHashMap&lt;K,V&gt;.Values</a></li>
+<li><a href="">实例成员内部类java.util.TreeMap&lt;K,V&gt;.Values</a></li>
+<li><a href="">实例成员内部类java.util.Hashtable&lt;K,V&gt;.ValueCollection</a></li>
+<li><a href="">实例成员内部类java.util.EnumMap&lt;K extends Enum&lt;K&gt;, V&gt;.Values</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.ConcurrentHashMap&lt;K, V&gt;.Values</a></li>
+<li><a href="">实例成员内部类java.util.concurrent.ConcurrentSkipListMap&lt;K,V&gt;.Values&lt;E&gt;</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/05/23/JavaJDK7源码-javalangIterableT/" rel="bookmark">Java JDK7源码-java.lang.Iterable&lt;T&gt;</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/06/30/JavaJDK7源码-javautilAbstractQueueE/" rel="bookmark">Java JDK7源码-java.util.AbstractQueue&lt;E&gt;</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/06/28/JavaJDK7源码-javautilAbstractSetE/" rel="bookmark">Java JDK7源码-java.util.AbstractSet&lt;E&gt;</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/05/24/JavaJDK7源码-javautilIteratorE/" rel="bookmark">Java JDK7源码-java.util.Iterator&lt;E&gt;</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2017/05/25/JavaJDK7源码-javautilListIteratorE/" rel="bookmark">Java JDK7源码-java.util.ListIterator&lt;E&gt;</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div></div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/wechatpay.png" alt="王艺凯 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>王艺凯
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/http:/reimuwang.org/2017/06/19/JavaJDK7%E6%BA%90%E7%A0%81-javautilAbstractCollectionE/" title="Java JDK7源码-java.util.AbstractCollection&lt;E&gt;">http://reimuwang.org/2017/06/19/JavaJDK7源码-javautilAbstractCollectionE/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"><i class="fa fa-tag"></i> Java</a>
+              <a href="/tags/%E6%BA%90%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i> 源码</a>
+              <a href="/tags/Collection/" rel="tag"><i class="fa fa-tag"></i> Collection</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/06/16/JavaJDK7%E6%BA%90%E7%A0%81-javautilQueueE/" rel="prev" title="Java JDK7源码-java.util.Queue&lt;E&gt;">
+      <i class="fa fa-chevron-left"></i> Java JDK7源码-java.util.Queue&lt;E&gt;
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/06/19/JavaJDK7%E6%BA%90%E7%A0%81-javautilAbstractListE/" rel="next" title="Java JDK7源码-java.util.AbstractList&lt;E&gt;">
+      Java JDK7源码-java.util.AbstractList&lt;E&gt; <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#已整理层级关系"><span class="nav-number">2.</span> <span class="nav-text">已整理层级关系</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#综述"><span class="nav-number">3.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注1：Arrays-copyOf-r-i"><span class="nav-number">4.</span> <span class="nav-text">注1：Arrays.copyOf(r, i)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注2：finishToArray-r-it"><span class="nav-number">5.</span> <span class="nav-text">注2：finishToArray(r, it)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注3：System-arraycopy-r-0-a-0-i"><span class="nav-number">6.</span> <span class="nav-text">注3：System.arraycopy(r, 0, a, 0, i)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注4：toArray-T-a-的调用示例"><span class="nav-number">7.</span> <span class="nav-text">注4：toArray(T[] a)的调用示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注5-toString-调用示例"><span class="nav-number">8.</span> <span class="nav-text">注5 toString()调用示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#未整理层级关系"><span class="nav-number">9.</span> <span class="nav-text">未整理层级关系</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="王艺凯"
+      src="/avatar.jpg">
+  <p class="site-author-name" itemprop="name">王艺凯</p>
+  <div class="site-description" itemprop="description">Thou Shalt Comment</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">188</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ReimuWang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ReimuWang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1505580759@qq.com" title="E-Mail → mailto:1505580759@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+<div id="music163player">
+  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=470795480&auto=0&height=66"></iframe>
+</div>
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果冻保护协会</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">1.1m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:08</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
