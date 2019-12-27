@@ -58,7 +58,9 @@
 <meta property="og:description" content="前面，我们聊过了不要把用户画像当成银弹，也不要觉得一无是处。对于一个早期的推荐系统来说，基于内容推荐离不开为用户构建一个初级的画像，这种初级的画像一般叫做用户画像（User Profile），一些大厂内部还习惯叫做 UP，今天我们就来讲一讲从大量文本数据中挖掘用户画像常常用到的一些算法。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F&#x2F;%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C&#x2F;0.png">
-<meta property="og:updated_time" content="2019-12-27T08:33:33.541Z">
+<meta property="og:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F&#x2F;%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C&#x2F;1.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F&#x2F;%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C&#x2F;2.png">
+<meta property="og:updated_time" content="2019-12-27T11:15:26.489Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F&#x2F;%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C&#x2F;0.png">
 
@@ -147,7 +149,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">195</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">196</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
@@ -239,7 +241,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2019-12-27 15:41:49 / 修改时间：16:33:33" itemprop="dateCreated datePublished" datetime="2019-12-27T15:41:49+08:00">2019-12-27</time>
+              <time title="创建时间：2019-12-27 15:41:49 / 修改时间：19:15:26" itemprop="dateCreated datePublished" datetime="2019-12-27T15:41:49+08:00">2019-12-27</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -259,14 +261,14 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>4.1k</span>
+              <span>5.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
+              <span>5 分钟</span>
             </span>
 
         </div>
@@ -345,6 +347,7 @@
 <p><strong>3.内容分类</strong></p>
 <p>在门户网站时代，每个门户网站都有自己的频道体系，这个频道体系就是一个非常大的内容分类体系，这一做法也延伸到了移动互联网 UGC 时代，图文信息流 App 的资讯内容也需要被自动分类到不同的频道中，从而能够得到最粗粒度的结构化信息，也被很多推荐系统用来在用户冷启动时探索用户兴趣。</p>
 <p>在门户时代的内容分类，相对来说更容易，因为那时候的内容都是长文本，长文本的内容分类可以提取很多信息，而如今 UGC 当道的时代，短文本的内容分类则更困难一些。短文本分类方面经典的算法是 SVM ，在工具上现在最常用的是 Facebook 开源的 FastText。</p>
+<hr>
 <p><strong>4.实体识别</strong></p>
 <p>命名实体识别（也常常被简称为 NER，Named-Entity Recognition）在 NLP 技术中常常被认为是序列标注问题，和分词、词性标注属于同一类问题。所谓序列标注问题，就是给你一个字符序列，从左往右遍历每个字符，一边遍历一边对每一个字符分类，分类的体系因序列标注问题不同而不同：</p>
 <ol>
@@ -355,10 +358,12 @@
 <p>对于序列标注问题，通常的算法就是隐马尔科夫模型（HMM）或者条件随机场（CRF），我们在推荐系统中主要是挖掘出想要的结构化结果，对其中原理有兴趣再去深入了解。</p>
 <p>实体识别还有比较实用化的非模型做法：词典法。提前准备好各种实体的词典，使用 trie-tree 数据结构存储，拿着分好的词去词典里找，找到了某个词就认为是提前定义好的实体了。</p>
 <p>以实体识别为代表的序列标注问题上，工业级别的工具上 spaCy 比 NLTK 在效率上优秀一些。</p>
+<hr>
 <p><strong>5.聚类</strong></p>
 <p>传统聚类方法在文本中的应用，今天逐渐被主题模型取代，同样是无监督模型，以 LDA 为代表的主题模型能够更准确地抓住主题，并且能够得到软聚类的效果，也就是说可以让一条文本属于多个类簇。作为初创公司或初创产品，我知道你的时间宝贵，也知道你的公司处处节俭，以至于没有业务专家为你的应用制定分类体系，这时候如果能在文本数据上跑一个 LDA 模型，那世界就显得非常美好了。</p>
 <p>LDA 模型需要设定主题个数，如果你有时间，那么这个 K 可以通过一些实验来对比挑选，方法是：每次计算 K 个主题两两之间的平均相似度，选择一个较低的 K 值；如果你赶时间，在推荐系统领域，只要计算资源够用，主题数可以尽量多一些。</p>
 <p>另外，需要注意的是，得到文本在各个主题上的分布，可以保留概率最大的前几个主题作为文本的主题。LDA 工程上较难的是并行化，如果文本数量没到海量程度，提高单机配置也是可以的，开源的 LDA 训练工具有 Gensim，PLDA 等可供选择。</p>
+<hr>
 <p><strong>6.词嵌入</strong></p>
 <p>关于嵌入，是一个数学概念。以词嵌入为例来说吧。</p>
 <p>词嵌入，也叫作 Word Embedding。前面讲到的结构化方案，除了 LDA，其他都是得到一些标签，而这些标签无一例外都是稀疏的，而词嵌入则能够为每一个词学习得到一个稠密的向量。这样说可能很抽象，换个说法，一个词可能隐藏很多语义信息，比如北京，可能包含“首都、中国、北方、直辖市、大城市”等等，这些语义在所有文本上是有限的，比如 128 个，于是每个词就用一个 128 维的向量表达，向量中各个维度上的值大小代表了词包含各个语义的多少。拿着这些向量可以做以下的事情：</p>
@@ -379,6 +384,47 @@
 <li>每个用户看见过的物品就是一个文本集合</li>
 <li>在这个文本集合上使用特征选择算法选出每个用户关心的东西</li>
 </ol>
+<p><strong>1.卡方检验</strong></p>
+<p>CHI 就是卡方检验，本身是一种特征选择方法。前面的 TF-IDF 和 TextRank 都是无监督关键词提取算法，而卡方检验（CHI）则是有监督的，需要提供分类标注信息。为什么需要呢？在文本分类任务中，挑选关键词就得为了分类任务服务，而不仅仅是挑选出一种直观上看着重要的词。</p>
+<p>卡方检验本质上在检验“词和某个类别 C 相互独立”这个假设是否成立，和这个假设偏离越大，就越说明这个词和类别 C 暗中有一腿，那当然这个词就是关键词了。计算一个词 Wi 和一个类别 Cj 的卡方值，需要统计四个值：</p>
+<ol>
+<li>类别为 Cj 的文本中出现词 Wi 的文本数 A</li>
+<li>词 Wi 在非 Cj 的文本中出现的文本数 B</li>
+<li>类别为 Cj 的文本中没有出现 Wi 的文本数 C</li>
+<li>词 Wi 在非 Cj 的文本中没有出现的文本数 D</li>
+</ol>
+<p>听起来有点绕，我们把它画成一个表格就一目了然了：</p>
+<p><img src="/images/blog_pic/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F/%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C/1.png" alt="1.png"></p>
+<p>然后按照如下公式计算每一个词和每一个类别的卡方值：</p>
+<p><img src="/images/blog_pic/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F/%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C/2.png" alt="2.png"></p>
+<p>关于这个卡方值计算，有如下说明：</p>
+<ol>
+<li>每个词和每个类别都要计算，只要对其中一个类别有帮助的词都应该留下</li>
+<li>由于是比较卡方值的大小，所以公式中的 N 可以不参与计算，因为它对每个词都一样，就是总的文本数</li>
+<li>卡方值越大，意味着偏离“词和类别相互独立”的假设越远，靠“词和类别互相不独立”这个备择假设越近</li>
+</ol>
+<hr>
+<p><strong>2.信息增益</strong></p>
+<p>IG 即 Information Gain，信息增益，也是一种有监督的关键词选择方法，也需要有标注信息。要理解信息增益，理解了信息熵就差不多了。</p>
+<p>信息熵，一批文本被标注了类别，那么任意挑出一条文本问你，“猜猜这是什么类别？”如果原来每个类别的文本数量都一样，那你肯定最不好猜，如果其中一个类别的文本 C 数远远多于其他类别，那么你猜这条文本属于类别 C 就很可能猜对。这两个情况区别就在于信息熵不同：</p>
+<ol>
+<li>各个类别的文本数量差不多时，信息熵就比较大</li>
+<li>其中少数类别的文本数量明显较多时，信息熵就较小</li>
+</ol>
+<p>进一步再想一件事，如果从这一堆文本中再挑出包含有词 W 的文本数，再来猜任意一条文本的类别时，仍然会有上面两种情况。这时候考虑一个情况：如果在整个文本上的情况是 1，但挑出包含词 W 后的情况变成 2 了，那么你想，这个词 W 是不是非常有用？因为有了它，我们就能以较高的成功率猜对任意一条文本的类别了。</p>
+<p>对，上面这个思考过程就是信息增益的思想，信息增益计算也是分成三步：</p>
+<ol>
+<li>统计全局文本的信息熵</li>
+<li>统计每个词的条件熵，就是知道了一个词后再统计文本的信息熵，只不过这里要分别计算包含词和不包含词两部分的信息熵，再按照各自文本比例加权平均</li>
+<li>两者相减就是每个词的信息增益</li>
+</ol>
+<p>信息增益应用最广就是数据挖掘中的决策树分类算法，经典的决策树分类算法挑选分裂节点时就是计算各个属性的信息增益，始终挑选信息增益最大的节点作为分裂节点。</p>
+<p>卡方检验和信息增益不同之处在于：前者是针对每一个行为单独筛选一套标签出来，后者是全局统一筛选。这些方法都是在离线阶段批量完成的，把用户的画像生成配置成离线任务，每天更新一遍，次日就可以使用新的用户画像。那么对于一个新用户，能不能在他刚刚进入产品时就能够快速生成一个简单的画像呢？答案是：当然可以。这就是后面会讲到的 MAB 问题。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>用户画像对于推荐系统还是非常必要的，而产品中属文本数据最多，那如何用文本数据构建出用户的画像内容呢？本文按照如下步骤梳理了这一过程：</p>
+<ol>
+<li>分析用户的文本和物品的文本，使其结构化</li>
+<li>为用户挑选有信息量的结构化数据，作为其画像内容。其中，我们提出了把为用户挑选画像标签看成是特征选择问题</li>
+</ol>
 
     </div>
 
@@ -388,6 +434,9 @@
       
   <div class="popular-posts-header">相关文章</div>
   <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-原理篇内容推荐6超越标签的内容推荐系统/" rel="bookmark">推荐系统三十六式-原理篇·内容推荐 | 6.超越标签的内容推荐系统</a></div>
+    </li>
     <li class="popular-posts-item">
       <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-开篇词0用知识去对抗技术不平等/" rel="bookmark">推荐系统三十六式-开篇词 | 0.用知识去对抗技术不平等</a></div>
     </li>
@@ -399,9 +448,6 @@
     </li>
     <li class="popular-posts-item">
       <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-概念篇2个性化推荐系统有哪些绕不开的经典问题/" rel="bookmark">推荐系统三十六式-概念篇 | 2.个性化推荐系统有哪些绕不开的经典问题？</a></div>
-    </li>
-    <li class="popular-posts-item">
-      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-概念篇3这些你必须应该具备的思维模式/" rel="bookmark">推荐系统三十六式-概念篇 | 3.这些你必须应该具备的思维模式</a></div>
     </li>
   </ul>
 
@@ -453,7 +499,10 @@
     <a href="/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%904%E7%94%BB%E9%AC%BC%E5%AE%B9%E6%98%93%E7%94%BB%E4%BA%BA%E9%9A%BE%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E7%9A%84%E8%83%BD%E5%92%8C%E4%B8%8D%E8%83%BD/" rel="prev" title="推荐系统三十六式-原理篇·内容推荐 | 4.画鬼容易画人难：用户画像的“能”和“不能”">
       <i class="fa fa-chevron-left"></i> 推荐系统三十六式-原理篇·内容推荐 | 4.画鬼容易画人难：用户画像的“能”和“不能”
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%906%E8%B6%85%E8%B6%8A%E6%A0%87%E7%AD%BE%E7%9A%84%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/" rel="next" title="推荐系统三十六式-原理篇·内容推荐 | 6.超越标签的内容推荐系统">
+      推荐系统三十六式-原理篇·内容推荐 | 6.超越标签的内容推荐系统 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -491,7 +540,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#从文本开始"><span class="nav-number">1.</span> <span class="nav-text">从文本开始</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#构建用户画像"><span class="nav-number">2.</span> <span class="nav-text">构建用户画像</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结构化文本"><span class="nav-number">3.</span> <span class="nav-text">结构化文本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#标签选择"><span class="nav-number">4.</span> <span class="nav-text">标签选择</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#从文本开始"><span class="nav-number">1.</span> <span class="nav-text">从文本开始</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#构建用户画像"><span class="nav-number">2.</span> <span class="nav-text">构建用户画像</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结构化文本"><span class="nav-number">3.</span> <span class="nav-text">结构化文本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#标签选择"><span class="nav-number">4.</span> <span class="nav-text">标签选择</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -507,7 +556,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">195</span>
+          <span class="site-state-item-count">196</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -578,7 +627,7 @@
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">17:40</span>
+    <span title="站点阅读时长">17:42</span>
 </div>
 
         
