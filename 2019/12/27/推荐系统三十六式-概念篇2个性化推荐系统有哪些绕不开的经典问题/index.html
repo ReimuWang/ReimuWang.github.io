@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script src="/js/src/photoswipe.js?v="></script>
+  <script src="/js/src/photoswipe-ui-default.js?v="></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/myLogo32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/myLogo16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://reimuwang.org').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"always","padding":18,"offset":12,"onmobile":true},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="推荐系统发展到了今天，已经出现了一些常见的问题，一部分已经有很好的解决方案，另外一部分却还没有通用解决方案，需要根据实际情况做一下具体的分析。 今天我们来聊一聊这些问题。本文首先会讲一些推荐系统中的问题模式，然后再专门说一些需要面对的具体问题。">
+<meta name="keywords" content="推荐">
+<meta property="og:type" content="article">
+<meta property="og:title" content="推荐系统三十六式-概念篇 | 2.个性化推荐系统有哪些绕不开的经典问题？">
+<meta property="og:url" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;2019&#x2F;12&#x2F;27&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E6%A6%82%E5%BF%B5%E7%AF%872%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%9C%89%E5%93%AA%E4%BA%9B%E7%BB%95%E4%B8%8D%E5%BC%80%E7%9A%84%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98&#x2F;index.html">
+<meta property="og:site_name" content="ReimuWang&#39;s Blog">
+<meta property="og:description" content="推荐系统发展到了今天，已经出现了一些常见的问题，一部分已经有很好的解决方案，另外一部分却还没有通用解决方案，需要根据实际情况做一下具体的分析。 今天我们来聊一聊这些问题。本文首先会讲一些推荐系统中的问题模式，然后再专门说一些需要面对的具体问题。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F&#x2F;%E6%A6%82%E5%BF%B5%E7%AF%872%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%9C%89%E5%93%AA%E4%BA%9B%E7%BB%95%E4%B8%8D%E5%BC%80%E7%9A%84%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98&#x2F;0.png">
+<meta property="og:updated_time" content="2019-12-27T07:04:16.466Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F&#x2F;%E6%A6%82%E5%BF%B5%E7%AF%872%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%9C%89%E5%93%AA%E4%BA%9B%E7%BB%95%E4%B8%8D%E5%BC%80%E7%9A%84%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98&#x2F;0.png">
+
+<link rel="canonical" href="http://reimuwang.org/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E6%A6%82%E5%BF%B5%E7%AF%872%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%9C%89%E5%93%AA%E4%BA%9B%E7%BB%95%E4%B8%8D%E5%BC%80%E7%9A%84%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>推荐系统三十六式-概念篇 | 2.个性化推荐系统有哪些绕不开的经典问题？ | ReimuWang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ReimuWang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">195</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">114</span></a>
+
+  </li>
+        <li class="menu-item menu-item-photos">
+
+    <a href="/photos/" rel="section"><i class="fa fa-fw fa-photo"></i>Photos</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/ReimuWang" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://reimuwang.org/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E6%A6%82%E5%BF%B5%E7%AF%872%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%9C%89%E5%93%AA%E4%BA%9B%E7%BB%95%E4%B8%8D%E5%BC%80%E7%9A%84%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.jpg">
+      <meta itemprop="name" content="王艺凯">
+      <meta itemprop="description" content="Thou Shalt Comment">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ReimuWang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          推荐系统三十六式-概念篇 | 2.个性化推荐系统有哪些绕不开的经典问题？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2019-12-27 11:51:49 / 修改时间：15:04:16" itemprop="dateCreated datePublished" datetime="2019-12-27T11:51:49+08:00">2019-12-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F/" itemprop="url" rel="index">
+                    <span itemprop="name">推荐系统三十六式</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>推荐系统发展到了今天，已经出现了一些常见的问题，一部分已经有很好的解决方案，另外一部分却还没有通用解决方案，需要根据实际情况做一下具体的分析。</p>
+<p>今天我们来聊一聊这些问题。本文首先会讲一些推荐系统中的问题模式，然后再专门说一些需要面对的具体问题。</p>
+<a id="more"></a>
+
+<h1 id="推荐系统的问题模式"><a href="#推荐系统的问题模式" class="headerlink" title="推荐系统的问题模式"></a>推荐系统的问题模式</h1><p>我们知道，推荐系统的使命是为用户和物品建立连接，建立的方式是提前找出那些隐藏的连接呈现给用户，这是一个预测问题；所以推荐系统的预测问题模式，从达成的连接目标角度区分，有两大类：</p>
+<ol>
+<li>评分预测</li>
+<li>行为预测</li>
+</ol>
+<p>因为评分和行为是用户对推荐结果的两类反馈，我们给他们推荐了一个或多个物品，目的是希望他们“消费”，这种消费反应在用户行为上，比如“点击查看”，信息咨询类的还有“阅读完成”，视频音乐类的有“播放完成”，电商类的“加入购物车”等。</p>
+<p>整个行为呈现一个漏斗形状，从曝光到最终消费完成。最后在用户完成消费后，产品方一般还希望他们告诉自己消费的体验，这时候就有评分了；所以不同推荐系统的任务也不同，有的直接去预测用户如果消费完之后会给多少评分，更多的推荐系统则会分层，致力于预测用户的行为。下面我分别详细说一下这两类问题。</p>
+<h1 id="评分预测"><a href="#评分预测" class="headerlink" title="评分预测"></a>评分预测</h1><p>评分预测相关算法模型研究的兴盛，最大的助攻是 Netflix 举办的推荐算法大赛。</p>
+<p>评分预测要干的事情是这样的：假如用户消费完一个物品之后会给出一个打分，比如通常是 1-5 分，或者有的网站用星星的颗数表示，也是一样。我们就想能不能提前预测一个用户对每一个物品会打多少分，找出那些他可能会打高分，但是还没消费的物品，然后装作若无其事地呈现在他面前，惊不惊喜，意不意外?</p>
+<p>说干就干，怎么干呢？正如王小波给李银河写的信那样：不能胡干。一个朴素的思想是：建立一个模型，这个模型会给用户历史上打过分的物品去预测分数。</p>
+<p>预测分数和实际分数之间会有误差，我们根据这个误差去调整模型参数，让这个误差越来越小，最后得到的这个模型理论上就可以为我们干活了。事实上，这其实就是个机器学习里面的回归问题。</p>
+<p>Netflix 比赛的评判标准就是 RMSE ，即均方根误差，怎么算的呢？</p>
+<p><img src="/images/blog_pic/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F/%E6%A6%82%E5%BF%B5%E7%AF%872%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%9C%89%E5%93%AA%E4%BA%9B%E7%BB%95%E4%B8%8D%E5%BC%80%E7%9A%84%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98/0.png" alt="0.png"></p>
+<p>这个公式中的 t 表示每一个样本，n 表示总共的样本数，有帽子的 yt 就是模型预测出的分数，是我们交的作业，秃顶的 yt 就是用户自己打的分数，是标准答案，然后一个样本一个样本地对答案，模型预测分数和用户自己打分相减，这就是我们预测的误差。由于误差有正数也有负数，而我们只关心绝对值大小，所以再给误差求平方，这就是名字中的“方”的来源，再对所有样本的误差平方求平均值，这就是名字中“均”的来源，因为我们对误差都平方了，所以最后再对均值开方根，这就是名字中的“根”的来源。这个过程就是求均方根误差。</p>
+<p>评分预测问题常见于各种点评类产品（如：书影音的点评），但评分类推荐存在以下问题：</p>
+<ol>
+<li>数据不易收集，刚才说过，用户给出评分意味着他已经完成了前面所有的漏斗环节</li>
+<li>数据质量不能保证，伪造评分数据门槛低，同时真实的评分数据又处在转化漏斗最后一环，门槛高</li>
+<li>评分的分布不稳定，整体评分在不同时期会差别很大，个人评分在不同时期标准不同，人和人之间的标准差别很大</li>
+</ol>
+<p>用户爸爸们给产品施舍的评分数据，我们又叫做显式反馈，意思是他们非常清晰明白地告诉了我们，他们对这个物品的态度；与之相对的还有隐式反馈，通常就是各类用户行为，也就是另一类推荐系统问题：行为预测。</p>
+<h1 id="行为预测"><a href="#行为预测" class="headerlink" title="行为预测"></a>行为预测</h1><p>实际上，用户爸爸们每天要在不同的 App 或者网站之间不停批阅奏章，日理万机，非常忙，所以能够提交的像评分这种显式反馈数据很少。</p>
+<p>但是没关系，只要用户来了，就会有各种行为数据产生，从登录刷新，到购买收藏，都是用户行为，这类数据是用户们在自觉自愿的情况下产生的，数据量比显式反馈多很多。</p>
+<p>用户的行为通常呈现漏斗关系，我希望用户最终达成的行为可能不是那么容易得到的，比如购买，比如建立一个社交关系，比如完整消费一个长内容，通常是从登录刷新开始，逐层经历漏斗流失。而推荐系统肩负的使命自然是达成用户行为，也就是连接越多越好。这也是这一类推荐系统问题的关注点。</p>
+<p>推荐系统预测行为方式有很多，常见的有两种：直接预测行为本身发生的概率，和预测物品的相对排序。直接预测用户行为这一类技术，有一个更烂大街的名字，叫做 CTR 预估。这里的 C 原本是点击行为 Click，但这个解决问题的模式可以引申到任何其他用户行为，如收藏、购买。</p>
+<p>CTR 意思就是 Click Through Rate，即“点击率”。把每一个推荐给用户的物品按照“会否点击”二分类，构建分类模型，预估其中一种分类的概率，就是 CTR 预估。</p>
+<p>行为预测说白了，就是利用隐式反馈数据预测隐式反馈的发生概率；也因此，各家互联网产品要高度重视隐式反馈，归纳起来有以下几点原因。</p>
+<ol>
+<li>数据比显式反馈更加稠密。诚然，评分数据总体来说是很稀疏的，之前 Netflix 的百万美元挑战赛给出的数据稀疏度大概是 1.2%，毕竟评分数据是要消耗更多注意力的数据</li>
+<li>隐式反馈更代表用户的真实想法，比如你不是很赞成川普的观点，但还是想经常看到他的内容（以便吐槽他），这是显式反馈无法捕捉的。而人们在 Quora 上投出一些赞成票也许只是为了鼓励一下作者，或者表达一些作者的同情，甚至只是因为政治正确而投，实际上对内容很难说真正感兴趣</li>
+<li>隐式反馈常常和模型的目标函数关联更密切，也因此通常更容易在 AB 测试中和测试指标挂钩。这个好理解，比如 CTR 预估当然关注的是点击这个隐式反馈</li>
+</ol>
+<p>用户给出较高评分的先决条件是用户要有“评分”的行为，所以行为预测解决的是推荐系统的 80% 问题，评分预测解决的是最后那 20% 的问题，行为预测就像是我们剁手买买买后，可爱的商品要先乘坐飞机，飞跃千山万水到所在区域来，而评分预测则是快递员最终将东西递交到你手上这个过程。</p>
+<h1 id="几个常见顽疾"><a href="#几个常见顽疾" class="headerlink" title="几个常见顽疾"></a>几个常见顽疾</h1><p>讨论了两大类推荐系统的问题后，我们再来看几个推荐系统的隐藏顽疾。之所以说这些是隐藏顽疾，是因为它们还没有很好的通用解决方案，并且不容易被重视，这几个顽疾分别是：</p>
+<p><strong>1. 冷启动问题</strong></p>
+<p>推荐系统是数据贪婪型应用，所谓数据贪婪型应用，就是对数据的需求绝无足够的那一天。冷启动问题广泛存在于互联网产品中，但我们这里仅仅限于推荐系统的冷启动。</p>
+<p>新用户或者不活跃用户，以及新物品或展示次数较少的物品，这些用户和物品，由于缺乏相关数据，很是空虚寂寞冷，因此就是冷启动问题的关注对象。</p>
+<p>关于“如何解决冷启动”本身，有伪命题的嫌疑，因为通常的解决方式就是给它加热：想办法引入数据，想办法从已有数据中主动学习（一种半监督学习）。我们会在后面的文章中详细讨论冷启动的问题。</p>
+<hr>
+<p><strong>2. 探索与利用问题</strong></p>
+<p>探索与利用，行话又叫做 EE 问题。假如我们已经知道了用户的喜好，一般有三种对待方式：</p>
+<ol>
+<li>全部给他推荐他目前肯定感兴趣的物品</li>
+<li>无视他的兴趣，按照其他逻辑给他推荐，如编辑推荐、随机推荐、按时间先后推荐等等</li>
+<li>大部分给他推荐感兴趣的，小部分去试探新的兴趣，如同一边收割长好的韭菜，一边播种新的韭菜</li>
+</ol>
+<p>哪一种更科学和持久呢？显然是第三种，那么如何平衡这里的“大部分”和“小部分”呢？</p>
+<p>这就是 Exploit 和 Explore 问题的核心了。Exploit 意为“开采”，对用户身上已经探明的兴趣加以利用，Explore 意为“探索”，探明用户身上还不知道的兴趣。</p>
+<p>我们会在后面的文章中详细讨论 EE 问题。</p>
+<hr>
+<p><strong>3. 安全问题</strong></p>
+<p>凡是系统就有漏洞，凡是漏洞有利可图，就一定有人去图，推荐系统也不例外。如果你正在一款流量非常大的产品上构建推荐系统，那么一定要考虑推荐系统攻击问题。推荐系统被攻击的影响大致有以下几个：</p>
+<ol>
+<li>给出不靠谱的推荐结果，影响用户体验并最终影响品牌形象</li>
+<li>收集了不靠谱的脏数据，这个影响会一直持续留存在产品中，很难完全消除</li>
+<li>损失了产品的商业利益，这个是直接的经济损失</li>
+</ol>
+<p>所以推荐系统的安全问题：有哪些攻击手段，以及对应的防御办法，这些我们也会在后面的文章中予以讨论。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本文从两个角度总结了推荐系统中的常见问题：第一个角度是模型的角度，将推荐系统的模型分成了预测评分和预测行为，这样一来，自己有什么数据就选择什么样的模型。另一个角度是看看推荐系统中一些永恒存在但是潜在的问题，包括冷启动、EE 问题、安全问题。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-开篇词0用知识去对抗技术不平等/" rel="bookmark">推荐系统三十六式-开篇词 | 0.用知识去对抗技术不平等</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-原理篇内容推荐4画鬼容易画人难用户画像的能和不能/" rel="bookmark">推荐系统三十六式-原理篇·内容推荐 | 4.画鬼容易画人难：用户画像的“能”和“不能”</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-概念篇1你真的需要个性化推荐系统吗/" rel="bookmark">推荐系统三十六式-概念篇 | 1.你真的需要个性化推荐系统吗?</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-原理篇内容推荐5从文本到用户画像有多远/" rel="bookmark">推荐系统三十六式-原理篇·内容推荐 | 5.从文本到用户画像有多远</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-概念篇3这些你必须应该具备的思维模式/" rel="bookmark">推荐系统三十六式-概念篇 | 3.这些你必须应该具备的思维模式</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div></div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/wechatpay.png" alt="王艺凯 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>王艺凯
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/http:/reimuwang.org/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E6%A6%82%E5%BF%B5%E7%AF%872%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%9C%89%E5%93%AA%E4%BA%9B%E7%BB%95%E4%B8%8D%E5%BC%80%E7%9A%84%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98/" title="推荐系统三十六式-概念篇 | 2.个性化推荐系统有哪些绕不开的经典问题？">http://reimuwang.org/2019/12/27/推荐系统三十六式-概念篇2个性化推荐系统有哪些绕不开的经典问题/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E6%8E%A8%E8%8D%90/" rel="tag"><i class="fa fa-tag"></i> 推荐</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E6%A6%82%E5%BF%B5%E7%AF%871%E4%BD%A0%E7%9C%9F%E7%9A%84%E9%9C%80%E8%A6%81%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%90%97/" rel="prev" title="推荐系统三十六式-概念篇 | 1.你真的需要个性化推荐系统吗?">
+      <i class="fa fa-chevron-left"></i> 推荐系统三十六式-概念篇 | 1.你真的需要个性化推荐系统吗?
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E6%A6%82%E5%BF%B5%E7%AF%873%E8%BF%99%E4%BA%9B%E4%BD%A0%E5%BF%85%E9%A1%BB%E5%BA%94%E8%AF%A5%E5%85%B7%E5%A4%87%E7%9A%84%E6%80%9D%E7%BB%B4%E6%A8%A1%E5%BC%8F/" rel="next" title="推荐系统三十六式-概念篇 | 3.这些你必须应该具备的思维模式">
+      推荐系统三十六式-概念篇 | 3.这些你必须应该具备的思维模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#推荐系统的问题模式"><span class="nav-number">1.</span> <span class="nav-text">推荐系统的问题模式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#评分预测"><span class="nav-number">2.</span> <span class="nav-text">评分预测</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#行为预测"><span class="nav-number">3.</span> <span class="nav-text">行为预测</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#几个常见顽疾"><span class="nav-number">4.</span> <span class="nav-text">几个常见顽疾</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="王艺凯"
+      src="/avatar.jpg">
+  <p class="site-author-name" itemprop="name">王艺凯</p>
+  <div class="site-description" itemprop="description">Thou Shalt Comment</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">195</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">114</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ReimuWang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ReimuWang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1505580759@qq.com" title="E-Mail → mailto:1505580759@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+<div id="music163player">
+  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=470795480&auto=0&height=66"></iframe>
+</div>
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果冻保护协会</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">1.2m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">17:40</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

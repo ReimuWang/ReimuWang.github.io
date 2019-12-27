@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script src="/js/src/photoswipe.js?v="></script>
+  <script src="/js/src/photoswipe-ui-default.js?v="></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/myLogo32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/myLogo16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://reimuwang.org').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"always","padding":18,"offset":12,"onmobile":true},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="前面，我们聊过了不要把用户画像当成银弹，也不要觉得一无是处。对于一个早期的推荐系统来说，基于内容推荐离不开为用户构建一个初级的画像，这种初级的画像一般叫做用户画像（User Profile），一些大厂内部还习惯叫做 UP，今天我们就来讲一讲从大量文本数据中挖掘用户画像常常用到的一些算法。">
+<meta name="keywords" content="推荐">
+<meta property="og:type" content="article">
+<meta property="og:title" content="推荐系统三十六式-原理篇·内容推荐 | 5.从文本到用户画像有多远">
+<meta property="og:url" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;2019&#x2F;12&#x2F;27&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C&#x2F;index.html">
+<meta property="og:site_name" content="ReimuWang&#39;s Blog">
+<meta property="og:description" content="前面，我们聊过了不要把用户画像当成银弹，也不要觉得一无是处。对于一个早期的推荐系统来说，基于内容推荐离不开为用户构建一个初级的画像，这种初级的画像一般叫做用户画像（User Profile），一些大厂内部还习惯叫做 UP，今天我们就来讲一讲从大量文本数据中挖掘用户画像常常用到的一些算法。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F&#x2F;%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C&#x2F;0.png">
+<meta property="og:updated_time" content="2019-12-27T08:33:33.541Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;images&#x2F;blog_pic&#x2F;%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F&#x2F;%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C&#x2F;0.png">
+
+<link rel="canonical" href="http://reimuwang.org/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>推荐系统三十六式-原理篇·内容推荐 | 5.从文本到用户画像有多远 | ReimuWang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ReimuWang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">195</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">114</span></a>
+
+  </li>
+        <li class="menu-item menu-item-photos">
+
+    <a href="/photos/" rel="section"><i class="fa fa-fw fa-photo"></i>Photos</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/ReimuWang" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://reimuwang.org/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.jpg">
+      <meta itemprop="name" content="王艺凯">
+      <meta itemprop="description" content="Thou Shalt Comment">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ReimuWang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          推荐系统三十六式-原理篇·内容推荐 | 5.从文本到用户画像有多远
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2019-12-27 15:41:49 / 修改时间：16:33:33" itemprop="dateCreated datePublished" datetime="2019-12-27T15:41:49+08:00">2019-12-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F/" itemprop="url" rel="index">
+                    <span itemprop="name">推荐系统三十六式</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前面，我们聊过了不要把用户画像当成银弹，也不要觉得一无是处。对于一个早期的推荐系统来说，基于内容推荐离不开为用户构建一个初级的画像，这种初级的画像一般叫做用户画像（User Profile），一些大厂内部还习惯叫做 UP，今天我们就来讲一讲从大量文本数据中挖掘用户画像常常用到的一些算法。</p>
+<a id="more"></a>
+
+<h1 id="从文本开始"><a href="#从文本开始" class="headerlink" title="从文本开始"></a>从文本开始</h1><p>用户这一端比如说有:</p>
+<ol>
+<li>注册资料中的姓名、个人签名</li>
+<li>发表的评论、动态、日记等</li>
+<li>聊天记录（不要慌，举个例子而已，你在微信上说的话还是安全的）</li>
+</ol>
+<p>物品这一端也有大量文本信息，可以用于构建物品画像（ Item Profile ），并最终帮助丰富 用户画像（User Profile），这些数据举例来说有：</p>
+<ol>
+<li>物品的标题、描述</li>
+<li>物品本身的内容（一般指新闻资讯类）</li>
+<li>物品的其他基本属性的文本</li>
+</ol>
+<p>文本数据是互联网产品中最常见的信息表达形式，数量多、处理快、存储小，因为文本数据的特殊地位，所以今天我们专门介绍一些建立用户画像过程中用到的文本挖掘算法。</p>
+<h1 id="构建用户画像"><a href="#构建用户画像" class="headerlink" title="构建用户画像"></a>构建用户画像</h1><p>要用物品和用户的文本信息构建出一个基础版本的用户画像，大致需要做这些事：</p>
+<ol>
+<li>把所有非结构化的文本结构化，去粗取精，保留关键信息</li>
+<li>根据用户行为数据把物品的结构化结果传递给用户，与用户自己的结构化信息合并</li>
+</ol>
+<p>第一步最关键也最基础，其准确性、粒度、覆盖面都决定了用户画像的质量。仿佛如果真的要绘制一个用户的模样，要提前给他拍照，这个拍照技术决定了后面的描绘情况，无论是采用素描、油画、工笔还是写意。这一步要用到很多文本挖掘算法，稍后会详细介绍。第二步则会把物品的文本分析结果，按照用户历史行为把物品画像（ Item Profile ）传递给用户。</p>
+<h1 id="结构化文本"><a href="#结构化文本" class="headerlink" title="结构化文本"></a>结构化文本</h1><p>我们拿到的文本，常常是自然语言描述的，用行话说，就是“非结构化”的，但是计算机在处理时，只能使用结构化的数据索引，检索，然后向量化后再计算；所以分析文本，就是为了将非结构化的数据结构化，好比是将模拟信号数字化一样，只有这样才能送入计算机，继续计算。这个很好理解，不多解释。我们可以利用成熟的 NLP 算法分析得到的信息有下面几种。</p>
+<ol>
+<li>关键词提取：最基础的标签来源，也为其他文本分析提供基础数据，常用 TF-IDF 和 TextRank</li>
+<li>实体识别：人物、位置和地点、著作、影视剧、历史事件和热点事件等，常用基于词典的方法结合 CRF 模型</li>
+<li>内容分类：将文本按照分类体系分类，用分类来表达较粗粒度的结构化信息</li>
+<li>文本 ：在无人制定分类体系的前提下，无监督地将文本划分成多个类簇也很常见，别看不是标签，类簇编号也是用户画像的常见构成</li>
+<li>主题模型：从大量已有文本中学习主题向量，然后再预测新的文本在各个主题上的概率分布情况，也很实用，其实这也是一种聚类思想，主题向量也不是标签形式，也是用户画像的常用构成</li>
+<li>嵌入：“嵌入”也叫作 Embedding，从词到篇章，无不可以学习这种嵌入表达。嵌入表达是为了挖掘出字面意思之下的语义信息，并且用有限的维度表达出来</li>
+</ol>
+<p>下面我们来介绍几种常用的文本结构化算法。</p>
+<p><strong>1.TF-IDF</strong></p>
+<p>TF 全称就是 Term Frequency，是词频的意思，IDF 就是 Inverse Document Frequency 是逆文档频率的意思。TF-IDF 提取关键词的思想来自信息检索领域，其实思想很朴素，包括了两点：在一篇文字中反复出现的词会更重要，在所有文本中都出现的词更不重要。非常符合我们的直觉，这两点就分别量化成 TF 和 IDF 两个指标：</p>
+<ol>
+<li>TF，就是词频，在要提取关键词的文本中出现的次数</li>
+<li>IDF，是提前统计好的，在已有的所有文本中，统计每一个词出现在了多少文本中，记为 n，也就是文档频率，一共有多少文本，记为 N</li>
+</ol>
+<p>IDF 就是这样计算的：</p>
+<p><img src="/images/blog_pic/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F/%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C/0.png" alt="0.png"></p>
+<p>IDF 的计算公式有这么几个特点：</p>
+<ol>
+<li>所有词的 N 都是一样的，因此出现文本数越少 (n) 的词，它的 IDF 值越大</li>
+<li>如果一个词的文档频率为 0，为防止计算出无穷大的 IDF，所以分母中有一个 1</li>
+</ol>
+<p>对于新词，本身应该 n 是 0，但也可以默认赋值为所有词的平均文档频率。</p>
+<p>计算出 TF 和 IDF 后，将两个值相乘，就得到每一个词的权重。根据该权重筛选关键词的方式有：</p>
+<ol>
+<li>给定一个 K，取 Top K 个词，这样做简单直接，但也有一点，如果总共得到的词个数少于 K，那么所有词都是关键词了，显然这样做不合理</li>
+<li>计算所有词权重的平均值，取在权重在平均值之上的词作为关键词</li>
+</ol>
+<p>另外，在某些场景下，还会加入以下其他的过滤措施，如：只提取动词和名词作为关键词。</p>
+<hr>
+<p><strong>2.TextRank</strong></p>
+<p>TextRank 这个名字看上去是不是和著名的 PageRank 有点亲戚关系？是的，TextRank 是 PageRank 的私生子之一，著名的 PageRank 算法是 Google 用来衡量网页重要性的算法，TextRank 算法的思想也与之类似，可以概括为：</p>
+<ol>
+<li>文本中，设定一个窗口宽度，比如 K 个词，统计窗口内的词和词的共现关系，将其看成无向图。图就是网络，由存在连接关系的节点构成，所谓无向图，就是节点之间的连接关系不考虑从谁出发，有关系就对了</li>
+<li>所有词初始化的重要性都是 1</li>
+<li>每个节点把自己的权重平均分配给“和自己有连接“的其他节点</li>
+<li>每个节点将所有其他节点分给自己的权重求和，作为自己的新权重</li>
+<li>如此反复迭代第 3、4 两步，直到所有的节点权重收敛为止</li>
+</ol>
+<p>通过 TextRank 计算后的词语权重，呈现出这样的特点：那些有共现关系的会互相支持对方成为关键词。</p>
+<hr>
+<p><strong>3.内容分类</strong></p>
+<p>在门户网站时代，每个门户网站都有自己的频道体系，这个频道体系就是一个非常大的内容分类体系，这一做法也延伸到了移动互联网 UGC 时代，图文信息流 App 的资讯内容也需要被自动分类到不同的频道中，从而能够得到最粗粒度的结构化信息，也被很多推荐系统用来在用户冷启动时探索用户兴趣。</p>
+<p>在门户时代的内容分类，相对来说更容易，因为那时候的内容都是长文本，长文本的内容分类可以提取很多信息，而如今 UGC 当道的时代，短文本的内容分类则更困难一些。短文本分类方面经典的算法是 SVM ，在工具上现在最常用的是 Facebook 开源的 FastText。</p>
+<p><strong>4.实体识别</strong></p>
+<p>命名实体识别（也常常被简称为 NER，Named-Entity Recognition）在 NLP 技术中常常被认为是序列标注问题，和分词、词性标注属于同一类问题。所谓序列标注问题，就是给你一个字符序列，从左往右遍历每个字符，一边遍历一边对每一个字符分类，分类的体系因序列标注问题不同而不同：</p>
+<ol>
+<li>分词问题：对每一个字符分类为“词开始”“词中间”“词结束”三类之一</li>
+<li>词性标注：对每一个分好的词，分类为定义的词性集合的之一</li>
+<li>实体识别：对每一个分好的词，识别为定义的命名实体集合之一</li>
+</ol>
+<p>对于序列标注问题，通常的算法就是隐马尔科夫模型（HMM）或者条件随机场（CRF），我们在推荐系统中主要是挖掘出想要的结构化结果，对其中原理有兴趣再去深入了解。</p>
+<p>实体识别还有比较实用化的非模型做法：词典法。提前准备好各种实体的词典，使用 trie-tree 数据结构存储，拿着分好的词去词典里找，找到了某个词就认为是提前定义好的实体了。</p>
+<p>以实体识别为代表的序列标注问题上，工业级别的工具上 spaCy 比 NLTK 在效率上优秀一些。</p>
+<p><strong>5.聚类</strong></p>
+<p>传统聚类方法在文本中的应用，今天逐渐被主题模型取代，同样是无监督模型，以 LDA 为代表的主题模型能够更准确地抓住主题，并且能够得到软聚类的效果，也就是说可以让一条文本属于多个类簇。作为初创公司或初创产品，我知道你的时间宝贵，也知道你的公司处处节俭，以至于没有业务专家为你的应用制定分类体系，这时候如果能在文本数据上跑一个 LDA 模型，那世界就显得非常美好了。</p>
+<p>LDA 模型需要设定主题个数，如果你有时间，那么这个 K 可以通过一些实验来对比挑选，方法是：每次计算 K 个主题两两之间的平均相似度，选择一个较低的 K 值；如果你赶时间，在推荐系统领域，只要计算资源够用，主题数可以尽量多一些。</p>
+<p>另外，需要注意的是，得到文本在各个主题上的分布，可以保留概率最大的前几个主题作为文本的主题。LDA 工程上较难的是并行化，如果文本数量没到海量程度，提高单机配置也是可以的，开源的 LDA 训练工具有 Gensim，PLDA 等可供选择。</p>
+<p><strong>6.词嵌入</strong></p>
+<p>关于嵌入，是一个数学概念。以词嵌入为例来说吧。</p>
+<p>词嵌入，也叫作 Word Embedding。前面讲到的结构化方案，除了 LDA，其他都是得到一些标签，而这些标签无一例外都是稀疏的，而词嵌入则能够为每一个词学习得到一个稠密的向量。这样说可能很抽象，换个说法，一个词可能隐藏很多语义信息，比如北京，可能包含“首都、中国、北方、直辖市、大城市”等等，这些语义在所有文本上是有限的，比如 128 个，于是每个词就用一个 128 维的向量表达，向量中各个维度上的值大小代表了词包含各个语义的多少。拿着这些向量可以做以下的事情：</p>
+<ol>
+<li>计算词和词之间的相似度，扩充结构化标签</li>
+<li>累加得到一个文本的稠密向量</li>
+<li>用于聚类，会得到比使用词向量聚类更好的语义聚类效果</li>
+</ol>
+<p>这方面当然就属大名鼎鼎的 Word2Vec 了。Word2Vec 是用浅层神经网络学习得到每个词的向量表达，Word2Vec 最大的贡献在于一些工程技巧上的优化，使得百万词的规模在单机上可以几分钟轻松跑出来，得到这些词向量后可以聚类或者进一步合成句子向量再使用。</p>
+<h1 id="标签选择"><a href="#标签选择" class="headerlink" title="标签选择"></a>标签选择</h1><p>前面说到，用户端的文本，物品端的文本如何结构化，得到了诸如标签（关键词、分类等）、主题、词嵌入向量。接下来就是第二步：如何把物品的结构化信息给用户呢？</p>
+<p>我们想一想，用户在产品上看到了很多我们用各种逻辑和理由展示给他的物品，他只从中消费了一部分物品。现在问题就是，到底是那些特性吸引了他消费呢？</p>
+<p>一种简单粗暴的办法是直接把用户产生过行为的物品标签累积在一起，但是这里要说的是另一种思路。</p>
+<p>我们把用户对物品的行为，消费或者没有消费看成是一个分类问题。用户用实际行动帮我们标注了若干数据，那么挑选出他实际感兴趣的特性就变成了特征选择问题。</p>
+<p>最常用的是两个方法：卡方检验（CHI）和信息增益（IG）。基本思想是：</p>
+<ol>
+<li>把物品的结构化内容看成文档</li>
+<li>把用户对物品的行为看成是类别</li>
+<li>每个用户看见过的物品就是一个文本集合</li>
+<li>在这个文本集合上使用特征选择算法选出每个用户关心的东西</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-开篇词0用知识去对抗技术不平等/" rel="bookmark">推荐系统三十六式-开篇词 | 0.用知识去对抗技术不平等</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-原理篇内容推荐4画鬼容易画人难用户画像的能和不能/" rel="bookmark">推荐系统三十六式-原理篇·内容推荐 | 4.画鬼容易画人难：用户画像的“能”和“不能”</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-概念篇1你真的需要个性化推荐系统吗/" rel="bookmark">推荐系统三十六式-概念篇 | 1.你真的需要个性化推荐系统吗?</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-概念篇2个性化推荐系统有哪些绕不开的经典问题/" rel="bookmark">推荐系统三十六式-概念篇 | 2.个性化推荐系统有哪些绕不开的经典问题？</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2019/12/27/推荐系统三十六式-概念篇3这些你必须应该具备的思维模式/" rel="bookmark">推荐系统三十六式-概念篇 | 3.这些你必须应该具备的思维模式</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div></div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/wechatpay.png" alt="王艺凯 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>王艺凯
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/http:/reimuwang.org/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%905%E4%BB%8E%E6%96%87%E6%9C%AC%E5%88%B0%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%89%E5%A4%9A%E8%BF%9C/" title="推荐系统三十六式-原理篇·内容推荐 | 5.从文本到用户画像有多远">http://reimuwang.org/2019/12/27/推荐系统三十六式-原理篇内容推荐5从文本到用户画像有多远/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E6%8E%A8%E8%8D%90/" rel="tag"><i class="fa fa-tag"></i> 推荐</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/12/27/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%8D%81%E5%85%AD%E5%BC%8F-%E5%8E%9F%E7%90%86%E7%AF%87%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%904%E7%94%BB%E9%AC%BC%E5%AE%B9%E6%98%93%E7%94%BB%E4%BA%BA%E9%9A%BE%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E7%9A%84%E8%83%BD%E5%92%8C%E4%B8%8D%E8%83%BD/" rel="prev" title="推荐系统三十六式-原理篇·内容推荐 | 4.画鬼容易画人难：用户画像的“能”和“不能”">
+      <i class="fa fa-chevron-left"></i> 推荐系统三十六式-原理篇·内容推荐 | 4.画鬼容易画人难：用户画像的“能”和“不能”
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#从文本开始"><span class="nav-number">1.</span> <span class="nav-text">从文本开始</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#构建用户画像"><span class="nav-number">2.</span> <span class="nav-text">构建用户画像</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结构化文本"><span class="nav-number">3.</span> <span class="nav-text">结构化文本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#标签选择"><span class="nav-number">4.</span> <span class="nav-text">标签选择</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="王艺凯"
+      src="/avatar.jpg">
+  <p class="site-author-name" itemprop="name">王艺凯</p>
+  <div class="site-description" itemprop="description">Thou Shalt Comment</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">195</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">114</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ReimuWang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ReimuWang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1505580759@qq.com" title="E-Mail → mailto:1505580759@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+<div id="music163player">
+  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=470795480&auto=0&height=66"></iframe>
+</div>
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果冻保护协会</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">1.2m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">17:40</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
