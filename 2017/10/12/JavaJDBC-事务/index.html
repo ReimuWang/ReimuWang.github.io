@@ -50,7 +50,7 @@
 </script>
 
   <meta name="description" content="只有存在并发数据访问时才需要事务。 事务的ACID 原子性(Atomic)：事务中各项操作，要么全做要么全不做，任何一项操作的失败都会导致整个事务的失败 一致性(Consistent)：事务必须使数据库从一个一致性状态变到另一个一致性状态 隔离性(Isolated)：并发执行的事务彼此无法看到对方的中间状态 持久性(Durable)：事务完成后所做的改动都会被持久化。即使发生灾难性的失败，都可以通">
-<meta name="keywords" content="Java,并发,事务,JDBC">
+<meta name="keywords" content="Java,JDBC,并发,事务">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java JDBC-事务">
 <meta property="og:url" content="http:&#x2F;&#x2F;reimuwang.org&#x2F;2017&#x2F;10&#x2F;12&#x2F;JavaJDBC-%E4%BA%8B%E5%8A%A1&#x2F;index.html">
@@ -152,7 +152,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">196</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">197</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
@@ -334,13 +334,13 @@
       <div class="popular-posts-title"><a href="/2017/10/12/JavaJDBC-示例/" rel="bookmark">Java JDBC-示例</a></div>
     </li>
     <li class="popular-posts-item">
-      <div class="popular-posts-title"><a href="/2017/09/29/Java并发-3个并发相关的定律/" rel="bookmark">Java 并发-3个并发相关的定律</a></div>
-    </li>
-    <li class="popular-posts-item">
       <div class="popular-posts-title"><a href="/2018/02/07/Java并发-BlockingQueue/" rel="bookmark">Java 并发-BlockingQueue</a></div>
     </li>
     <li class="popular-posts-item">
-      <div class="popular-posts-title"><a href="/2017/12/29/Java并发-Condition条件/" rel="bookmark">Java 并发-Condition条件</a></div>
+      <div class="popular-posts-title"><a href="/2017/09/29/Java并发-3个并发相关的定律/" rel="bookmark">Java 并发-3个并发相关的定律</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2018/02/07/Java并发-CopyOnWriteArrayList/" rel="bookmark">Java 并发-CopyOnWriteArrayList</a></div>
     </li>
   </ul>
 
@@ -381,9 +381,9 @@
           
           <div class="post-tags">
               <a href="/tags/Java/" rel="tag"><i class="fa fa-tag"></i> Java</a>
+              <a href="/tags/JDBC/" rel="tag"><i class="fa fa-tag"></i> JDBC</a>
               <a href="/tags/%E5%B9%B6%E5%8F%91/" rel="tag"><i class="fa fa-tag"></i> 并发</a>
               <a href="/tags/%E4%BA%8B%E5%8A%A1/" rel="tag"><i class="fa fa-tag"></i> 事务</a>
-              <a href="/tags/JDBC/" rel="tag"><i class="fa fa-tag"></i> JDBC</a>
           </div>
 
         
@@ -452,7 +452,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">196</span>
+          <span class="site-state-item-count">197</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -523,7 +523,7 @@
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">17:42</span>
+    <span title="站点阅读时长">17:44</span>
 </div>
 
         
